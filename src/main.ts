@@ -3,7 +3,13 @@ import "./style.css";
 import { Observable, fromEvent, interval, merge, of } from "rxjs";
 import { delay, expand, filter, first, map } from "rxjs/operators";
 import { Constants, Viewport } from "./constants";
-import { moveBlockLeft, moveBlockRight, rotateCurrentBlock } from "./generics";
+import {
+  holdCurrentBlock,
+  moveBlockLeft,
+  moveBlockRight,
+  rotateCurrentBlock,
+  setCurrentBlock,
+} from "./generics";
 import { initialState, tick } from "./state";
 import { BlockPosition, Key, Movement, State } from "./types";
 import { render } from "./view";
@@ -50,8 +56,13 @@ export function main() {
     map((_) => "Rotate")
   );
 
+  const hold$: Observable<Movement> = key$.pipe(
+    fromKey("KeyH"),
+    map((_) => "Hold")
+  );
+
   // Merge the movement observables into a single observable
-  const movement$ = merge(left$, right$, rotate$).pipe(
+  const movement$ = merge(left$, right$, rotate$, hold$).pipe(
     map((movement): Movement => movement)
   );
 
@@ -75,6 +86,20 @@ export function main() {
     Right: createGameAction(moveBlockRight),
     Rotate: createGameAction(rotateCurrentBlock),
     Down: (s: State) => tick(s),
+    Hold: (s: State) => {
+      const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(
+        s.currentBlock,
+        s.holdBlock
+      );
+      const { newCurrentBlock: finalCurrentBlock, newNextBlock } =
+        setCurrentBlock(newCurrentBlock, s.nextBlock);
+      return {
+        ...s,
+        currentBlock: finalCurrentBlock,
+        nextBlock: newNextBlock,
+        holdBlock: newHoldBlock,
+      };
+    },
   };
 
   // Create an observable for the game state

@@ -3,6 +3,54 @@ import { generateRandomBlock } from "./shapes";
 import { BlockPosition, CubePosition, CurrentBlock, Direction } from "./types";
 
 /**
+ * Holds the current block and the hold block.
+ * @param currentBlock - The current block to be held.
+ * @param holdBlock - The block to be held.
+ * @returns An object containing the new current block and the new hold block.
+ */
+export const holdCurrentBlock = (
+  currentBlock: CurrentBlock,
+  holdBlock: BlockPosition | undefined
+): {
+  newCurrentBlock: CurrentBlock;
+  newHoldBlock: BlockPosition | undefined;
+} => {
+  if (!currentBlock) {
+    // If there is no current block, return the current block and hold block as is
+    return { newCurrentBlock: currentBlock, newHoldBlock: holdBlock };
+  } else if (!holdBlock) {
+    // If there is no hold block, set the current block as the hold block and return undefined for the current block
+    return { newCurrentBlock: undefined, newHoldBlock: currentBlock };
+  } else {
+    // If there is a hold block, swap the current block and the hold block
+    return { newCurrentBlock: holdBlock, newHoldBlock: currentBlock };
+  }
+};
+
+/**
+ * Sets the current block and the next block.
+ * @param currentBlock - The current block to be set.
+ * @param nextBlock - The next block to be set.
+ * @returns An object containing the new current block and the new next block.
+ */
+export const setCurrentBlock = (
+  currentBlock: CurrentBlock,
+  nextBlock: BlockPosition | undefined
+): {
+  newCurrentBlock: CurrentBlock;
+  newNextBlock: BlockPosition | undefined;
+} => {
+  if (currentBlock) {
+    // If there is a current block, return the current block and next block as is
+    return { newCurrentBlock: currentBlock, newNextBlock: nextBlock };
+  } else {
+    // If there is no current block, set the next block as the current block and generate a new next block
+    const { newCurrentBlock, newNextBlock } = generateBlock(nextBlock);
+    return { newCurrentBlock, newNextBlock };
+  }
+};
+
+/**
  * Generates a new current block and a new next block.
  * @param nextBlock - The next block to be generated.
  * @returns An object containing the new current block and the new next block.

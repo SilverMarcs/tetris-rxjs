@@ -5,17 +5,18 @@ export type BlockPosition = Position<number>[];
 
 export type CurrentBlock = BlockPosition | undefined; // this can be undefined because the game starts with no current block or when as block reaches the bottom, there is no current block
 
-export type Key = "KeyA" | "KeyD" | "Enter";
+export type Key = "KeyA" | "KeyD" | "KeyH" | "Enter";
 
 export type Direction = "Left" | "Right" | "Down";
 
 export type Rotation = "Rotate";
-export type Movement = Direction | Rotation;
+export type Movement = Direction | Rotation | "Hold";
 
 export type State = Readonly<{
   gameEnd: boolean;
   currentBlock?: BlockPosition;
   nextBlock?: BlockPosition;
+  holdBlock?: BlockPosition;
   oldBlocks: BlockPosition[];
   score: number;
   highScore: number;
