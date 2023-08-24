@@ -4,10 +4,12 @@ import {
   generateBlock,
   hasBlockReachedTop,
   holdBlockAction,
+  holdCurrentBlock,
   moveBlockLeft,
   moveBlockRight,
   moveCurrentBlockDown,
   rotateCurrentBlock,
+  setCurrentBlock,
   updateTickRate,
 } from "./generics";
 
@@ -111,14 +113,15 @@ export const gameActions: { [key in Movement]: (s: State) => State } = {
   Rotate: createGameAction(rotateCurrentBlock),
   Down: (s: State) => tick(s),
   Hold: (s: State) => {
-    const { newCurrentBlock, newHoldBlock, newNextBlock } = holdBlockAction(
+    const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(
       s.currentBlock,
-      s.holdBlock,
-      s.nextBlock
+      s.holdBlock
     );
+    const { newCurrentBlock: finalCurrentBlock, newNextBlock } =
+      setCurrentBlock(newCurrentBlock, s.nextBlock);
     return {
       ...s,
-      currentBlock: newCurrentBlock,
+      currentBlock: finalCurrentBlock,
       nextBlock: newNextBlock,
       holdBlock: newHoldBlock,
     };
