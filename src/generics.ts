@@ -1,8 +1,3 @@
-/**
- * Contains utility functions for working with generic types.
- * @packageDocumentation
- */
-
 import { Constants } from "./constants";
 import { generateRandomBlock } from "./shapes";
 import { BlockPosition, CubePosition, CurrentBlock, Direction } from "./types";
@@ -28,10 +23,9 @@ export const generateBlock = (
  * @param direction - The direction in which the block should be moved.
  * @returns A function that moves a block in the given direction.
  */
-export const move = (
-  direction: Direction
-): ((block: BlockPosition) => BlockPosition) => {
-  return (block: BlockPosition): BlockPosition =>
+export const move =
+  (direction: Direction) =>
+  (block: BlockPosition): BlockPosition =>
     block.map((pos) => {
       switch (direction) {
         case "Down":
@@ -42,7 +36,11 @@ export const move = (
           return { ...pos, x: pos.x + 1 };
       }
     });
-};
+
+/*
+ * Returns a function that moves a block down.
+ */
+const moveDown = move("Down");
 
 /**
  * Returns a function that checks if an object has collided with another object in a given direction.
@@ -71,6 +69,10 @@ export const hasObjectCollided = (
         )
       );
 };
+
+const hasObjectCollidedDown = hasObjectCollided("Down");
+const hasObjectCollidedLeft = hasObjectCollided("Left");
+const hasObjectCollidedRight = hasObjectCollided("Right");
 
 /**
  * Rotates a block clockwise.
@@ -347,9 +349,9 @@ export const rotateCurrentBlock = (
         cubePos.y < 0 ||
         cubePos.y >= Constants.GRID_HEIGHT
     ) ||
-    hasObjectCollided("Down")(rotatedBlock)(oldBlocks) ||
-    hasObjectCollided("Left")(rotatedBlock)(oldBlocks) ||
-    hasObjectCollided("Right")(rotatedBlock)(oldBlocks)
+    hasObjectCollidedDown(rotatedBlock)(oldBlocks) ||
+    hasObjectCollidedLeft(rotatedBlock)(oldBlocks) ||
+    hasObjectCollidedRight(rotatedBlock)(oldBlocks)
   ) {
     // If not, it returns the current block without rotating it
     return currentBlock;
@@ -373,11 +375,11 @@ export const moveCurrentBlockDown = (
   if (
     !currentBlock ||
     hasBlockReachedBottom(currentBlock) ||
-    hasObjectCollided("Down")(currentBlock)(oldBlocks)
+    hasObjectCollidedDown(currentBlock)(oldBlocks)
   ) {
     return undefined;
   } else {
     // Otherwise, it moves the block down
-    return move("Down")(currentBlock);
+    return moveDown(currentBlock);
   }
 };

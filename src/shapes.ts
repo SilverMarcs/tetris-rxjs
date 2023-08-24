@@ -2,6 +2,10 @@ import { Constants } from "./constants";
 import { BlockPosition } from "./types";
 import { randomInt } from "./util";
 
+/**
+ * Generates a random block position on the game grid.
+ * @returns {BlockPosition} A block position represented as an array of {x, y} coordinates.
+ */
 export const generateRandomBlock = (): BlockPosition => {
   const randomX = randomInt(0, Constants.GRID_WIDTH - 4); // -4 to ensure the block fits within the grid
   const shapeType = randomInt(0, 6); // Randomly select a shape type
