@@ -3,7 +3,6 @@ import {
   clearFullRows,
   generateBlock,
   hasBlockReachedTop,
-  holdBlockAction,
   holdCurrentBlock,
   moveBlockLeft,
   moveBlockRight,

@@ -384,30 +384,6 @@ export const moveCurrentBlockDown = (
   }
 };
 
-export const holdBlockAction = (
-  currentBlock: Block,
-  holdBlock: Block,
-  nextBlock: Block
-): {
-  newCurrentBlock: Block;
-  newHoldBlock: Block;
-  newNextBlock: Block;
-} => {
-  const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(
-    currentBlock,
-    holdBlock
-  );
-  const { newCurrentBlock: finalCurrentBlock, newNextBlock } = setCurrentBlock(
-    newCurrentBlock,
-    nextBlock
-  );
-  return {
-    newCurrentBlock: finalCurrentBlock,
-    newHoldBlock,
-    newNextBlock,
-  };
-};
-
 /**
  * Holds the current block and the hold block.
  * @param currentBlock - The current block to be held.
