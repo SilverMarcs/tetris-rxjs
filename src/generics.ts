@@ -1,54 +1,6 @@
 import { Constants } from "./constants";
 import { generateRandomBlock } from "./shapes";
-import { BlockPosition, CubePosition, CurrentBlock, Direction } from "./types";
-
-/**
- * Holds the current block and the hold block.
- * @param currentBlock - The current block to be held.
- * @param holdBlock - The block to be held.
- * @returns An object containing the new current block and the new hold block.
- */
-export const holdCurrentBlock = (
-  currentBlock: CurrentBlock,
-  holdBlock: CurrentBlock
-): {
-  newCurrentBlock: CurrentBlock;
-  newHoldBlock: CurrentBlock;
-} => {
-  if (!currentBlock) {
-    // If there is no current block, return the current block and hold block as is
-    return { newCurrentBlock: currentBlock, newHoldBlock: holdBlock };
-  } else if (!holdBlock) {
-    // If there is no hold block, set the current block as the hold block and return undefined for the current block
-    return { newCurrentBlock: undefined, newHoldBlock: currentBlock };
-  } else {
-    // If there is a hold block, swap the current block and the hold block
-    return { newCurrentBlock: holdBlock, newHoldBlock: currentBlock };
-  }
-};
-
-/**
- * Sets the current block and the next block.
- * @param currentBlock - The current block to be set.
- * @param nextBlock - The next block to be set.
- * @returns An object containing the new current block and the new next block.
- */
-export const setCurrentBlock = (
-  currentBlock: CurrentBlock,
-  nextBlock: CurrentBlock
-): {
-  newCurrentBlock: CurrentBlock;
-  newNextBlock: CurrentBlock;
-} => {
-  if (currentBlock) {
-    // If there is a current block, return the current block and next block as is
-    return { newCurrentBlock: currentBlock, newNextBlock: nextBlock };
-  } else {
-    // If there is no current block, set the next block as the current block and generate a new next block
-    const { newCurrentBlock, newNextBlock } = generateBlock(nextBlock);
-    return { newCurrentBlock, newNextBlock };
-  }
-};
+import { Block, BlockPosition, CubePosition, Direction } from "./types";
 
 /**
  * Generates a new current block and a new next block.
@@ -56,7 +8,7 @@ export const setCurrentBlock = (
  * @returns An object containing the new current block and the new next block.
  */
 export const generateBlock = (
-  nextBlock: CurrentBlock
+  nextBlock: Block
 ): { newCurrentBlock: BlockPosition; newNextBlock: BlockPosition } => {
   // If nextBlock is defined, use it as the new current block, otherwise generate a new random block
   const newCurrentBlock = nextBlock ? nextBlock : generateRandomBlock();
@@ -332,10 +284,10 @@ export const updateTickRate = (
 const createMoveBlockAction =
   (direction: Direction, boundaryCheck: (cubePos: CubePosition) => boolean) =>
   (
-    currentBlock: CurrentBlock,
+    currentBlock: Block,
     oldBlocks: BlockPosition[],
     gameEnd: boolean
-  ): CurrentBlock => {
+  ): Block => {
     // If there is no current block, the game has ended, the block has reached the boundary, or the block has collided with any old block, it returns the current block without moving it
     if (
       !currentBlock ||
@@ -376,10 +328,10 @@ export const moveBlockRight = createMoveBlockAction(
  * @returns The new position of the block after rotation. If the rotation is not possible, it returns the current block without rotating.
  */
 export const rotateCurrentBlock = (
-  currentBlock: CurrentBlock,
+  currentBlock: Block,
   oldBlocks: BlockPosition[],
   gameEnd: boolean
-): CurrentBlock => {
+): Block => {
   // If there is no current block or the game has ended, it returns the current block without rotating it
   if (!currentBlock || gameEnd) {
     return currentBlock;
@@ -417,8 +369,8 @@ export const rotateCurrentBlock = (
  */
 export const moveCurrentBlockDown = (
   oldBlocks: BlockPosition[],
-  currentBlock: CurrentBlock
-): CurrentBlock => {
+  currentBlock: Block
+): Block => {
   // If there is no current block or the block has reached the bottom or the block has collided with any old block, it returns undefined
   if (
     !currentBlock ||
@@ -429,5 +381,77 @@ export const moveCurrentBlockDown = (
   } else {
     // Otherwise, it moves the block down
     return moveDown(currentBlock);
+  }
+};
+
+export const holdBlockAction = (
+  currentBlock: Block,
+  holdBlock: Block,
+  nextBlock: Block
+): {
+  newCurrentBlock: Block;
+  newHoldBlock: Block;
+  newNextBlock: Block;
+} => {
+  const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(
+    currentBlock,
+    holdBlock
+  );
+  const { newCurrentBlock: finalCurrentBlock, newNextBlock } = setCurrentBlock(
+    newCurrentBlock,
+    nextBlock
+  );
+  return {
+    newCurrentBlock: finalCurrentBlock,
+    newHoldBlock,
+    newNextBlock,
+  };
+};
+
+/**
+ * Holds the current block and the hold block.
+ * @param currentBlock - The current block to be held.
+ * @param holdBlock - The block to be held.
+ * @returns An object containing the new current block and the new hold block.
+ */
+export const holdCurrentBlock = (
+  currentBlock: Block,
+  holdBlock: Block
+): {
+  newCurrentBlock: Block;
+  newHoldBlock: Block;
+} => {
+  if (!currentBlock) {
+    // If there is no current block, return the current block and hold block as is
+    return { newCurrentBlock: currentBlock, newHoldBlock: holdBlock };
+  } else if (!holdBlock) {
+    // If there is no hold block, set the current block as the hold block and return undefined for the current block
+    return { newCurrentBlock: undefined, newHoldBlock: currentBlock };
+  } else {
+    // If there is a hold block, swap the current block and the hold block
+    return { newCurrentBlock: holdBlock, newHoldBlock: currentBlock };
+  }
+};
+
+/**
+ * Sets the current block and the next block.
+ * @param currentBlock - The current block to be set.
+ * @param nextBlock - The next block to be set.
+ * @returns An object containing the new current block and the new next block.
+ */
+export const setCurrentBlock = (
+  currentBlock: Block,
+  nextBlock: Block
+): {
+  newCurrentBlock: Block;
+  newNextBlock: Block;
+} => {
+  if (currentBlock) {
+    // If there is a current block, return the current block and next block as is
+    return { newCurrentBlock: currentBlock, newNextBlock: nextBlock };
+  } else {
+    // If there is no current block, set the next block as the current block and generate a new next block
+    const { newCurrentBlock, newNextBlock } = generateBlock(nextBlock);
+    return { newCurrentBlock, newNextBlock };
   }
 };

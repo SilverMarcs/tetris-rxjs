@@ -3,12 +3,19 @@ import {
   clearFullRows,
   generateBlock,
   hasBlockReachedTop,
+  holdBlockAction,
+  moveBlockLeft,
+  moveBlockRight,
   moveCurrentBlockDown,
+  rotateCurrentBlock,
   updateTickRate,
 } from "./generics";
 
-import { BlockPosition, State } from "./types";
+import { BlockPosition, Movement, State } from "./types";
 
+/**
+ * The initial state of the game.
+ */
 export const initialState: State = {
   gameEnd: false,
   oldBlocks: [],
@@ -75,4 +82,45 @@ export const tick = (state: State): State => {
       tickRate: newTickRate,
     };
   }
+};
+
+/**
+ * Creates a game action based on the given movement.
+ * @param action - The action to perform.
+ * @returns The new game state after the action.
+ */
+const createGameAction = (
+  action: (
+    currentBlock: BlockPosition | undefined,
+    oldBlocks: BlockPosition[],
+    gameEnd: boolean
+  ) => BlockPosition | undefined
+) => {
+  return (s: State): State => {
+    const newBlock = action(s.currentBlock, s.oldBlocks, s.gameEnd);
+    return newBlock ? { ...s, currentBlock: newBlock } : s;
+  };
+};
+
+/**
+ * The game actions that can be performed.
+ */
+export const gameActions: { [key in Movement]: (s: State) => State } = {
+  Left: createGameAction(moveBlockLeft),
+  Right: createGameAction(moveBlockRight),
+  Rotate: createGameAction(rotateCurrentBlock),
+  Down: (s: State) => tick(s),
+  Hold: (s: State) => {
+    const { newCurrentBlock, newHoldBlock, newNextBlock } = holdBlockAction(
+      s.currentBlock,
+      s.holdBlock,
+      s.nextBlock
+    );
+    return {
+      ...s,
+      currentBlock: newCurrentBlock,
+      nextBlock: newNextBlock,
+      holdBlock: newHoldBlock,
+    };
+  },
 };

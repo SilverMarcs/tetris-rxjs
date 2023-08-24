@@ -3,15 +3,8 @@ import "./style.css";
 import { Observable, fromEvent, interval, merge, of } from "rxjs";
 import { delay, expand, filter, first, map } from "rxjs/operators";
 import { Constants, Viewport } from "./constants";
-import {
-  holdCurrentBlock,
-  moveBlockLeft,
-  moveBlockRight,
-  rotateCurrentBlock,
-  setCurrentBlock,
-} from "./generics";
-import { initialState, tick } from "./state";
-import { BlockPosition, Key, Movement, State } from "./types";
+import { gameActions, initialState } from "./game";
+import { Key, Movement, State } from "./types";
 import { render } from "./view";
 
 /**
@@ -65,42 +58,6 @@ export function main() {
   const movement$ = merge(left$, right$, rotate$, hold$).pipe(
     map((movement): Movement => movement)
   );
-
-  // Function to create a game action based on a movement action
-  const createGameAction = (
-    action: (
-      currentBlock: BlockPosition | undefined,
-      oldBlocks: BlockPosition[],
-      gameEnd: boolean
-    ) => BlockPosition | undefined
-  ) => {
-    return (s: State): State => {
-      const newBlock = action(s.currentBlock, s.oldBlocks, s.gameEnd);
-      return newBlock ? { ...s, currentBlock: newBlock } : s;
-    };
-  };
-
-  // Map of game actions for each possible movement
-  const gameActions: { [key in Movement]: (s: State) => State } = {
-    Left: createGameAction(moveBlockLeft),
-    Right: createGameAction(moveBlockRight),
-    Rotate: createGameAction(rotateCurrentBlock),
-    Down: (s: State) => tick(s),
-    Hold: (s: State) => {
-      const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(
-        s.currentBlock,
-        s.holdBlock
-      );
-      const { newCurrentBlock: finalCurrentBlock, newNextBlock } =
-        setCurrentBlock(newCurrentBlock, s.nextBlock);
-      return {
-        ...s,
-        currentBlock: finalCurrentBlock,
-        nextBlock: newNextBlock,
-        holdBlock: newHoldBlock,
-      };
-    },
-  };
 
   // Create an observable for the game state
   const game$ = of(initialState).pipe(
