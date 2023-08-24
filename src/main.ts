@@ -2,7 +2,7 @@ import "./style.css";
 
 import { Observable, fromEvent, interval, merge, of } from "rxjs";
 import { delay, expand, filter, first, map } from "rxjs/operators";
-import { Viewport } from "./constants";
+import { Constants, Viewport } from "./constants";
 import { moveBlockLeft, moveBlockRight, rotateCurrentBlock } from "./generics";
 import { initialState, tick } from "./state";
 import { BlockPosition, Key, Movement, State } from "./types";
@@ -82,7 +82,9 @@ export function main() {
     expand((s: State) => {
       if (s.gameEnd) {
         const highScore = Math.max(s.score, s.highScore);
-        return of({ ...initialState, highScore }).pipe(delay(3000));
+        return of({ ...initialState, highScore }).pipe(
+          delay(Constants.GAME_OVER_DELAY_MS)
+        );
       } else {
         const tick$ = interval(s.tickRate).pipe(map(() => "Down" as Movement)); // casting is safe here because we know "Down" is a Movement
 

@@ -3,52 +3,44 @@
 ## Usage
 
 Setup (requires node.js):
+
 ```
 > npm install
 ```
 
 Start tests:
+
 ```
 > npm test
 ```
 
 Serve up the App (and ctrl-click the URL that appears in the console)
+
 ```
 > npm run dev
 ```
 
-## Implementing features
+## Definitions:
 
-There are a few files you may wish to modify. The rest should **not** be modified as they are used for configuring the build.
+`Cube` is a 1x1 object <br>
 
-`src/main.ts`
-- Code file used as the entry point
-- Most of your game logic should go here
-- Contains main function that is called on page load
+`Block` is an object made up of 4 cubes in any tetris shape <br>
 
-`src/style.css`
-- Stylesheet
-- You may edit this if you wish
+`Rotation` system used is a partial Super Rotation System (SRS) where it is possible to rotate a block 90 degrees clockwise
 
-`index.html`
-- Main html file
-- Contains scaffold of game window and some sample shapes
-- Feel free to add to this, but avoid changing the existing code, especially the `id` fields
+## Game Rules:
 
-`test/*.test.ts`
-- If you want to add tests, these go here
-- Uses ![`vitest`](https://vitest.dev/api/)
+- The game is over when a block reaches the top of the game board
+- 100 points are awarded for each row cleared
+- The game speed increases after reaching 200 score
+- The game restarts automatically after showing game over box for three seconds
+- Highscore is tracked until page is refreshed
+- Highscore is only updated at the end of the current round
 
-We expect the core logic of your game to be in `src/main.ts`, however, you may elect to spread your code over multiple files. In this case, please use ![TS Modules](https://www.typescriptlang.org/docs/handbook/modules.html).
+_factors like game speed, difficulty based on score, scoring etc. can be tweaked in the constants.ts file_
 
-Avoid separating code into too many files as it makes it hard to mark. The maximum recommended code file structure would be something like
+## Game Controls:
 
-```
-src/
-  main.ts        -- main code logic inc. core game loop
-  types.ts       -- common types and type aliases
-  util.ts        -- util functions
-  state.ts       -- state processing and transformation
-  view.ts        -- rendering
-  observable.ts  -- functions to create Observable streams
-```
+- `A` button: Move block left
+- `D` button: Move block right
+- `Enter` button: rotate block clockwise
