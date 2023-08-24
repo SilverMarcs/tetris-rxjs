@@ -10,10 +10,10 @@ import { BlockPosition, CubePosition, CurrentBlock, Direction } from "./types";
  */
 export const holdCurrentBlock = (
   currentBlock: CurrentBlock,
-  holdBlock: BlockPosition | undefined
+  holdBlock: CurrentBlock
 ): {
   newCurrentBlock: CurrentBlock;
-  newHoldBlock: BlockPosition | undefined;
+  newHoldBlock: CurrentBlock;
 } => {
   if (!currentBlock) {
     // If there is no current block, return the current block and hold block as is
@@ -35,10 +35,10 @@ export const holdCurrentBlock = (
  */
 export const setCurrentBlock = (
   currentBlock: CurrentBlock,
-  nextBlock: BlockPosition | undefined
+  nextBlock: CurrentBlock
 ): {
   newCurrentBlock: CurrentBlock;
-  newNextBlock: BlockPosition | undefined;
+  newNextBlock: CurrentBlock;
 } => {
   if (currentBlock) {
     // If there is a current block, return the current block and next block as is

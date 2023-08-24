@@ -43,4 +43,5 @@ _factors like game speed, difficulty based on score, scoring etc. can be tweaked
 
 - `A` button: Move block left
 - `D` button: Move block right
+- `H` button: Hold the block (more on this in Report)
 - `Enter` button: rotate block clockwise

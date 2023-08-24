@@ -25,3 +25,15 @@ The game logic is implemented in a reactive way. The game state is updated in re
 
 Functional Composition:
 Functional composition was used to create complex functions from simpler ones. This is evident in functions like clearFullRows, which is composed of several other functions.
+
+Additional feature:
+
+The feature is such that it allows the player to hold a block and swap it with the current block. This will allow the player to save a block for a more opportune time.
+
+Once a block is held, it cannot be swapped back immediately in the same turn. The player must first place the current block before they can swap the held block again.
+
+This rule is implemented to prevent the player from indefinitely stalling the game by continuously swapping the same block.
+
+So, in the context of the game we are implementing, only the current block that is falling can be held. Once a block is held, it remains in the hold area until the player decides to swap it with the current block.
+
+At the moment, the player needs to remember which block is in the hold area. This is because the hold area is not displayed on the game board for raising skill gap.
