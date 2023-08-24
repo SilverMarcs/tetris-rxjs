@@ -1,0 +1,21 @@
+{
+  "name": "assignment1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^0.34.1",
+    "typescript": "^5.1.6",
+    "vite": "^4.2.0",
+    "vitest": "^0.34.1"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.0"
+  }
+}
