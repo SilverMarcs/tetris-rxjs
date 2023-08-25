@@ -97,7 +97,14 @@ export function main() {
 
   // Subscribe to the game observable and render the game state for each new state
   game$.subscribe((s: State) => {
-    render(s, svg, scoreElement, highScoreElement, preview);
+    render(
+      s,
+      svg,
+      scoreElement,
+      highScoreElement,
+      highScore$.getValue(),
+      preview
+    );
   });
 }
 

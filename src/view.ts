@@ -53,10 +53,11 @@ export const renderPreview = (block: BlockPosition, preview: SVGElement) => {
 };
 
 export const render = (
-  { gameEnd, currentBlock, nextBlock, oldBlocks, score, highScore }: State,
+  { gameEnd, currentBlock, nextBlock, oldBlocks, score }: State,
   svg: SVGElement,
   scoreElement: HTMLElement,
   highScoreElement: HTMLElement,
+  highScore: number,
   preview?: SVGElement
 ) => {
   while (svg.firstChild) svg.firstChild.remove();
