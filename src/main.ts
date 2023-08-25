@@ -1,31 +1,19 @@
 import "./style.css";
 
+import { BehaviorSubject, Observable, fromEvent, interval, merge } from "rxjs";
 import {
-  BehaviorSubject,
-  Observable,
-  fromEvent,
-  interval,
-  merge,
-  of,
-} from "rxjs";
-import {
-  delay,
-  expand,
   filter,
-  first,
   map,
-  mapTo,
-  repeatWhen,
+  repeat,
   scan,
-  startWith,
   switchMap,
-  take,
   takeWhile,
   tap,
   withLatestFrom,
 } from "rxjs/operators";
 import { Constants, Viewport } from "./constants";
 import { gameActions, initialState } from "./game";
+import { getTickSpeed } from "./generics";
 import { Key, Movement, State } from "./types";
 import { render } from "./view";
 
@@ -77,21 +65,21 @@ export function main() {
   );
 
   // Create a stream of movements
-
   const movements$ = merge(left$, right$, rotate$, hold$);
 
-  // Create a stream of ticks
-  const ticks$ = interval(initialState.tickRate).pipe(
+  // Initialize highScore and score as a BehaviorSubject since we need to extract these values from the state
+  const highScore$ = new BehaviorSubject(0);
+  const score$ = new BehaviorSubject(0);
+
+  // Create a stream of ticks and its speed based on the score
+  const tick$ = score$.pipe(
+    switchMap((score) => interval(getTickSpeed(score))),
     map(() => "Down" as Movement)
   );
 
-  // Merge movements and ticks into a single stream
-  const events$ = merge(movements$, ticks$);
+  // const events$ = merge(movements$, tick$);
 
-  // Initialize highScore as a BehaviorSubject
-  const highScore$ = new BehaviorSubject(0);
-
-  const game$ = events$.pipe(
+  const game$ = merge(movements$, tick$).pipe(
     scan(
       (state: State, event: Movement) => gameActions[event](state),
       initialState
@@ -100,9 +88,10 @@ export function main() {
       if (state.gameEnd && state.score > highScore$.value) {
         highScore$.next(state.score);
       }
+      score$.next(state.score);
     }),
     takeWhile((state: State) => !state.gameEnd, true),
-    repeatWhen((completed$) => completed$.pipe(delay(3000))),
+    repeat({ delay: 3000 }), // delay before the game over screen disappears
     withLatestFrom(highScore$, (state, highScore) => ({ ...state, highScore }))
   );
 

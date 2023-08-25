@@ -431,3 +431,17 @@ export const setCurrentBlock = (
     return { newCurrentBlock, newNextBlock };
   }
 };
+
+/**
+ * Returns the tick speed based on the score.
+ * If the score is greater than or equal to the difficulty barrier score, it returns the tick rate decrease in milliseconds.
+ * Otherwise, it returns the tick rate in milliseconds.
+ * @param score The current score.
+ * @returns The tick speed in milliseconds.
+ */
+export const getTickSpeed = (score: number) => {
+  if (score >= Constants.DIFFICULTY_BARRIER_SCORE) {
+    return Constants.TICK_RATE_DECREASE_MS;
+  }
+  return Constants.TICK_RATE_MS;
+};
