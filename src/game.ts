@@ -1,4 +1,3 @@
-import { Constants } from "./constants";
 import {
   clearFullRows,
   generateBlock,
@@ -9,10 +8,9 @@ import {
   moveCurrentBlockDown,
   rotateCurrentBlock,
   setCurrentBlock,
-  updateTickRate,
 } from "./generics";
 
-import { BlockPosition, Movement, State } from "./types";
+import { Block, BlockPosition, Movement, State } from "./types";
 
 /**
  * The initial state of the game.
@@ -21,9 +19,7 @@ export const initialState: State = {
   gameEnd: false,
   oldBlocks: [],
   score: 0,
-  highScore: 0,
   nextBlock: undefined,
-  tickRate: Constants.TICK_RATE_MS,
 };
 
 /**
@@ -35,14 +31,10 @@ export const tick = (state: State): State => {
   // Clear full rows and get the new blocks and score
   const { newBlocks, newScore } = clearFullRows(state.oldBlocks, state.score);
 
-  // Update the tick rate based on the new score
-  const newTickRate = updateTickRate(newScore, state.tickRate);
-
   // Check if the game is over (a block has reached the top)
   const gameOver = hasBlockReachedTop(newBlocks);
 
   // Calculate the high score
-  const highScore = Math.max(state.score, state.highScore);
 
   // If the game is over, return the updated state with gameEnd set to true
   if (gameOver) {
@@ -51,8 +43,6 @@ export const tick = (state: State): State => {
       gameEnd: true,
       oldBlocks: newBlocks,
       score: newScore,
-      tickRate: newTickRate,
-      highScore, // Include the high score in the new state
     };
   }
 
@@ -75,8 +65,7 @@ export const tick = (state: State): State => {
         ? [...newBlocks, state.currentBlock] // Add the landed block to the old blocks
         : newBlocks,
       score: newScore,
-      tickRate: newTickRate,
-      highScore, // Include the high score in the new state
+      // tickRate: newTickRate,
     };
   } else {
     // If the current block could be moved down, return the updated state with the moved block
@@ -85,8 +74,7 @@ export const tick = (state: State): State => {
       currentBlock: movedCurrentBlock,
       oldBlocks: newBlocks,
       score: newScore,
-      tickRate: newTickRate,
-      highScore, // Include the high score in the new state
+      // tickRate: newTickRate,
     };
   }
 };
@@ -98,10 +86,10 @@ export const tick = (state: State): State => {
  */
 const createGameAction = (
   action: (
-    currentBlock: BlockPosition | undefined,
+    currentBlock: Block,
     oldBlocks: BlockPosition[],
     gameEnd: boolean
-  ) => BlockPosition | undefined
+  ) => Block
 ) => {
   return (s: State): State => {
     const newBlock = action(s.currentBlock, s.oldBlocks, s.gameEnd);

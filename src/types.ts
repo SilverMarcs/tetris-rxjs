@@ -19,6 +19,4 @@ export type State = Readonly<{
   holdBlock?: BlockPosition;
   oldBlocks: BlockPosition[];
   score: number;
-  highScore: number;
-  tickRate: number;
 }>;
