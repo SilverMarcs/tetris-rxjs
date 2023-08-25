@@ -41,6 +41,9 @@ export const tick = (state: State): State => {
   // Check if the game is over (a block has reached the top)
   const gameOver = hasBlockReachedTop(newBlocks);
 
+  // Calculate the high score
+  const highScore = Math.max(state.score, state.highScore);
+
   // If the game is over, return the updated state with gameEnd set to true
   if (gameOver) {
     return {
@@ -49,6 +52,7 @@ export const tick = (state: State): State => {
       oldBlocks: newBlocks,
       score: newScore,
       tickRate: newTickRate,
+      highScore, // Include the high score in the new state
     };
   }
 
@@ -72,6 +76,7 @@ export const tick = (state: State): State => {
         : newBlocks,
       score: newScore,
       tickRate: newTickRate,
+      highScore, // Include the high score in the new state
     };
   } else {
     // If the current block could be moved down, return the updated state with the moved block
@@ -81,6 +86,7 @@ export const tick = (state: State): State => {
       oldBlocks: newBlocks,
       score: newScore,
       tickRate: newTickRate,
+      highScore, // Include the high score in the new state
     };
   }
 };

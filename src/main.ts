@@ -1,7 +1,29 @@
 import "./style.css";
 
-import { Observable, fromEvent, interval, merge, of } from "rxjs";
-import { delay, expand, filter, first, map } from "rxjs/operators";
+import {
+  BehaviorSubject,
+  Observable,
+  fromEvent,
+  interval,
+  merge,
+  of,
+} from "rxjs";
+import {
+  delay,
+  expand,
+  filter,
+  first,
+  map,
+  mapTo,
+  repeatWhen,
+  scan,
+  startWith,
+  switchMap,
+  take,
+  takeWhile,
+  tap,
+  withLatestFrom,
+} from "rxjs/operators";
 import { Constants, Viewport } from "./constants";
 import { gameActions, initialState } from "./game";
 import { Key, Movement, State } from "./types";
@@ -54,28 +76,34 @@ export function main() {
     map((_) => "Hold")
   );
 
-  // Merge the movement observables into a single observable
-  const movement$ = merge(left$, right$, rotate$, hold$).pipe(
-    map((movement): Movement => movement)
+  // Create a stream of movements
+
+  const movements$ = merge(left$, right$, rotate$, hold$);
+
+  // Create a stream of ticks
+  const ticks$ = interval(initialState.tickRate).pipe(
+    map(() => "Down" as Movement)
   );
 
-  // Create an observable for the game state
-  const game$ = of(initialState).pipe(
-    expand((s: State) => {
-      if (s.gameEnd) {
-        const highScore = Math.max(s.score, s.highScore);
-        return of({ ...initialState, highScore }).pipe(
-          delay(Constants.GAME_OVER_DELAY_MS)
-        );
-      } else {
-        const tick$ = interval(s.tickRate).pipe(map(() => "Down" as Movement)); // casting is safe here because we know "Down" is a Movement
+  // Merge movements and ticks into a single stream
+  const events$ = merge(movements$, ticks$);
 
-        return merge(tick$, movement$).pipe(
-          first(),
-          map((event: Movement) => gameActions[event](s))
-        );
+  // Initialize highScore as a BehaviorSubject
+  const highScore$ = new BehaviorSubject(0);
+
+  const game$ = events$.pipe(
+    scan(
+      (state: State, event: Movement) => gameActions[event](state),
+      initialState
+    ),
+    tap((state: State) => {
+      if (state.gameEnd && state.score > highScore$.value) {
+        highScore$.next(state.score);
       }
-    })
+    }),
+    takeWhile((state: State) => !state.gameEnd, true),
+    repeatWhen((completed$) => completed$.pipe(delay(3000))),
+    withLatestFrom(highScore$, (state, highScore) => ({ ...state, highScore }))
   );
 
   // Subscribe to the game observable and render the game state for each new state
