@@ -16,6 +16,6 @@ export const Constants = {
 } as const;
 
 export const Cube = {
-  WIDTH: Viewport.CANVAS_WIDTH / Constants.GRID_WIDTH, // width of a block
-  HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT, // height of a block
+  WIDTH: Viewport.CANVAS_WIDTH / Constants.GRID_WIDTH,
+  HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT,
 };

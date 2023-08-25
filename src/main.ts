@@ -77,8 +77,6 @@ export function main() {
     map(() => "Down" as Movement)
   );
 
-  // const events$ = merge(movements$, tick$);
-
   const game$ = merge(movements$, tick$).pipe(
     scan(
       (state: State, event: Movement) => gameActions[event](state),

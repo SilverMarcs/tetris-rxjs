@@ -65,7 +65,6 @@ export const tick = (state: State): State => {
         ? [...newBlocks, state.currentBlock] // Add the landed block to the old blocks
         : newBlocks,
       score: newScore,
-      // tickRate: newTickRate,
     };
   } else {
     // If the current block could be moved down, return the updated state with the moved block
@@ -74,7 +73,6 @@ export const tick = (state: State): State => {
       currentBlock: movedCurrentBlock,
       oldBlocks: newBlocks,
       score: newScore,
-      // tickRate: newTickRate,
     };
   }
 };
