@@ -79,8 +79,8 @@ const hasObjectCollidedRight = hasObjectCollided("Right");
  * @param object - The block to be rotated.
  * @returns The rotated block.
  */
-export const rotate = (object: BlockPosition): BlockPosition => {
-  // Calculate the center of the block
+// Common rotate function
+const rotate = (object: BlockPosition, isClockwise: boolean): BlockPosition => {
   const center = object.reduce(
     (sum, pos) => ({ x: sum.x + pos.x, y: sum.y + pos.y }),
     { x: 0, y: 0 }
@@ -95,10 +95,18 @@ export const rotate = (object: BlockPosition): BlockPosition => {
   };
 
   // Rotate each cube in the block around the adjusted center
-  return object.map((pos) => ({
-    x: adjustedCenter.x - pos.y + adjustedCenter.y,
-    y: adjustedCenter.y + pos.x - adjustedCenter.x,
-  }));
+  return object.map((pos) => {
+    const rotatedPos = isClockwise
+      ? {
+          x: adjustedCenter.x - pos.y + adjustedCenter.y,
+          y: adjustedCenter.y + pos.x - adjustedCenter.x,
+        }
+      : {
+          x: adjustedCenter.x + pos.y - adjustedCenter.y,
+          y: adjustedCenter.y - pos.x + adjustedCenter.x,
+        };
+    return rotatedPos;
+  });
 };
 
 /**
@@ -327,18 +335,18 @@ export const moveBlockRight = createMoveBlockAction(
  * @param gameEnd - Indicates if the game has ended.
  * @returns The new position of the block after rotation. If the rotation is not possible, it returns the current block without rotating.
  */
-export const rotateCurrentBlock = (
+export const rotateBlock = (
   currentBlock: Block,
   oldBlocks: BlockPosition[],
-  gameEnd: boolean
+  gameEnd: boolean,
+  isClockwise: boolean
 ): Block => {
   // If there is no current block or the game has ended, it returns the current block without rotating it
   if (!currentBlock || gameEnd) {
     return currentBlock;
   }
 
-  // Calculates the new position of the block after rotating it
-  const rotatedBlock = rotate(currentBlock);
+  const rotatedBlock = rotate(currentBlock, isClockwise);
 
   // Checks if the rotated block is still within the grid and doesn't hit any old blocks
   if (
@@ -359,6 +367,28 @@ export const rotateCurrentBlock = (
 
   // If the rotated block is valid, it returns the rotated block
   return rotatedBlock;
+};
+
+/*
+ * Provides simple API for rotating blocks clockwise
+ */
+export const rotateBlockClockwise = (
+  currentBlock: Block,
+  oldBlocks: BlockPosition[],
+  gameEnd: boolean
+): Block => {
+  return rotateBlock(currentBlock, oldBlocks, gameEnd, true);
+};
+
+/*
+ * Provides simple API for rotating blocks anticlockwise
+ */
+export const rotateBlockAntiClockwise = (
+  currentBlock: Block,
+  oldBlocks: BlockPosition[],
+  gameEnd: boolean
+): Block => {
+  return rotateBlock(currentBlock, oldBlocks, gameEnd, false);
 };
 
 /**

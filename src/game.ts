@@ -6,7 +6,9 @@ import {
   moveBlockLeft,
   moveBlockRight,
   moveCurrentBlockDown,
-  rotateCurrentBlock,
+  rotateBlock,
+  rotateBlockAntiClockwise,
+  rotateBlockClockwise,
   setCurrentBlock,
 } from "./generics";
 
@@ -101,7 +103,8 @@ const createGameAction = (
 export const gameActions: { [key in Movement]: (s: State) => State } = {
   Left: createGameAction(moveBlockLeft),
   Right: createGameAction(moveBlockRight),
-  Rotate: createGameAction(rotateCurrentBlock),
+  RotateClockwise: createGameAction(rotateBlockClockwise),
+  RotateAntiClockwise: createGameAction(rotateBlockAntiClockwise),
   Down: (s: State) => tick(s),
   Hold: (s: State) => {
     const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(

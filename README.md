@@ -1,5 +1,8 @@
 # Assignment 1
 
+Zabir Raihan
+32353057
+
 ## Usage
 
 Setup (requires node.js):
@@ -49,4 +52,5 @@ _factors like game speed, difficulty based on score, scoring etc. can be tweaked
 - `A` button: Move block left
 - `D` button: Move block right
 - `H` button: Hold the block (more on this in Report)
-- `Enter` button: rotate block clockwise
+- `E` button: rotate block clockwise
+- `Q` button: rotate block anti-clockwise
