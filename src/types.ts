@@ -1,4 +1,4 @@
-export type Position<T = number> = { x: T; y: T };
+export type Position<T> = { x: T; y: T };
 
 export type CubePosition = Position<number>;
 export type BlockPosition = Position<number>[];

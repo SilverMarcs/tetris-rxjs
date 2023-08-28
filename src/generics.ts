@@ -32,11 +32,140 @@ const moveDownLogic = (pos: Position<number>) => ({ ...pos, y: pos.y + 1 });
 const moveLeftLogic = (pos: Position<number>) => ({ ...pos, x: pos.x - 1 });
 const moveRightLogic = (pos: Position<number>) => ({ ...pos, x: pos.x + 1 });
 
-/*
- * Returns a function that moves a block down.
+/**
+ * A higher-order function that creates a function to move a block in a specified direction.
+ * @param direction - The direction to move the block.
+ * @param boundaryCheck - A function that checks if the block has reached the boundary.
+ * @returns A function that takes the current block, old blocks, and game end status, and returns the new block position.
  */
-// const moveDown = move("Down");
-//
+const createMoveBlockAction =
+  (
+    moveLogic: (pos: Position<number>) => Position<number>,
+    boundaryCheck: (cubePos: CubePosition) => boolean
+  ) =>
+  (
+    currentBlock: Block,
+    oldBlocks: BlockPosition[],
+    gameEnd: boolean
+  ): Block => {
+    // If there is no current block, the game has ended, the block has reached the boundary, or the block has collided with any old block, it returns the current block without moving it
+    if (
+      !currentBlock ||
+      gameEnd ||
+      currentBlock.some(boundaryCheck) ||
+      hasObjectCollided(moveLogic)(currentBlock)(oldBlocks)
+    ) {
+      return currentBlock;
+    }
+
+    // Otherwise, it moves the block in the specified direction
+    return move(moveLogic)(currentBlock);
+  };
+
+export const moveBlockDown = createMoveBlockAction(
+  moveDownLogic,
+  (cubePos) => cubePos.y + 1 >= Constants.GRID_HEIGHT
+);
+
+export const moveBlockLeft = createMoveBlockAction(
+  moveLeftLogic,
+  (cubePos) => cubePos.x - 1 < 0
+);
+
+export const moveBlockRight = createMoveBlockAction(
+  moveRightLogic,
+  (cubePos) => cubePos.x + 1 >= Constants.GRID_WIDTH
+);
+
+/**
+ * Rotates a block clockwise.
+ * @param object - The block to be rotated.
+ * @returns The rotated block.
+ */
+
+// Common rotate function
+const rotate = (
+  object: BlockPosition,
+  rotateLogic: (pos: CubePosition, center: CubePosition) => CubePosition
+): BlockPosition => {
+  const center = object.reduce(
+    (sum, pos) => ({ x: sum.x + pos.x, y: sum.y + pos.y }),
+    { x: 0, y: 0 }
+  );
+  const centerX = Math.floor(center.x / object.length);
+  const centerY = Math.floor(center.y / object.length);
+
+  // Adjust the center to ensure it is in the middle of the block
+  const adjustedCenter = {
+    x: centerX % 2 === 0 ? centerX : centerX + 1,
+    y: centerY % 2 === 1 ? centerY : centerY + 1,
+  };
+
+  // Rotate each cube in the block around the adjusted center using the provided rotateLogic
+  return object.map((pos) => rotateLogic(pos, adjustedCenter));
+};
+
+const rotateClockwiseLogic = (pos: CubePosition, center: CubePosition) => ({
+  x: center.x - pos.y + center.y,
+  y: center.y + pos.x - center.x,
+});
+
+const rotateAntiClockwiseLogic = (pos: CubePosition, center: CubePosition) => ({
+  x: center.x + pos.y - center.y,
+  y: center.y - pos.x + center.x,
+});
+
+/**
+ * Function to rotate the current block.
+ * @param currentBlock - The block that needs to be rotated.
+ * @param oldBlocks - The blocks that have already been placed.
+ * @param gameEnd - Indicates if the game has ended.
+ * @returns The new position of the block after rotation. If the rotation is not possible, it returns the current block without rotating.
+ */
+const createRotateBlockAction =
+  (rotateLogic: (pos: BlockPosition) => BlockPosition) =>
+  (
+    currentBlock: Block,
+    oldBlocks: BlockPosition[],
+    gameEnd: boolean
+  ): Block => {
+    // If there is no current block or the game has ended, it returns the current block without rotating it
+    if (!currentBlock || gameEnd) {
+      return currentBlock;
+    }
+
+    const rotatedBlock = rotateLogic(currentBlock);
+
+    // Check if the rotated block is still within the grid and doesn't hit any old blocks
+    if (
+      rotatedBlock.some(
+        (cubePos) =>
+          cubePos.x < 0 ||
+          cubePos.x >= Constants.GRID_WIDTH ||
+          cubePos.y < 0 ||
+          cubePos.y >= Constants.GRID_HEIGHT
+      ) ||
+      hasObjectCollidedDown(rotatedBlock)(oldBlocks) ||
+      hasObjectCollidedLeft(rotatedBlock)(oldBlocks) ||
+      hasObjectCollidedRight(rotatedBlock)(oldBlocks)
+    ) {
+      // If not, it returns the current block without rotating it
+      return currentBlock;
+    }
+
+    // If the rotated block is valid, it returns the rotated block
+    return rotatedBlock;
+  };
+
+// Use the rotate logic functions to define the rotate block actions
+export const rotateBlockClockwise = createRotateBlockAction((block) =>
+  rotate(block, rotateClockwiseLogic)
+);
+
+export const rotateBlockAntiClockwise = createRotateBlockAction((block) =>
+  rotate(block, rotateAntiClockwiseLogic)
+);
+
 /**
  * Returns a function that checks if an object has collided with another object in a given direction.
  * @param direction - The direction in which the collision should be checked.
@@ -61,64 +190,9 @@ export const hasObjectCollided = (
       );
 };
 
-export const hasObjectCollidedDown = hasObjectCollided(moveDownLogic);
+export const hasObjectCollidedDown = hasObjectCollided(moveDownLogic); // need to export this since a tick in the game needs this
 const hasObjectCollidedLeft = hasObjectCollided(moveLeftLogic);
 const hasObjectCollidedRight = hasObjectCollided(moveRightLogic);
-
-/**
- * Rotates a block clockwise.
- * @param object - The block to be rotated.
- * @returns The rotated block.
- */
-// Common rotate function
-const rotate = (object: BlockPosition, isClockwise: boolean): BlockPosition => {
-  const center = object.reduce(
-    (sum, pos) => ({ x: sum.x + pos.x, y: sum.y + pos.y }),
-    { x: 0, y: 0 }
-  );
-  const centerX = Math.floor(center.x / object.length);
-  const centerY = Math.floor(center.y / object.length);
-
-  // Adjust the center to ensure it is in the middle of the block
-  const adjustedCenter = {
-    x: centerX % 2 === 0 ? centerX : centerX + 1,
-    y: centerY % 2 === 1 ? centerY : centerY + 1,
-  };
-
-  // Rotate each cube in the block around the adjusted center
-  return object.map((pos) => {
-    const rotatedPos = isClockwise
-      ? {
-          x: adjustedCenter.x - pos.y + adjustedCenter.y,
-          y: adjustedCenter.y + pos.x - adjustedCenter.x,
-        }
-      : {
-          x: adjustedCenter.x + pos.y - adjustedCenter.y,
-          y: adjustedCenter.y - pos.x + adjustedCenter.x,
-        };
-    return rotatedPos;
-  });
-};
-
-/**
- * Checks if a block can be moved in a given direction.
- * @param block - The block to be moved.
- * @param oldBlocks - The existing blocks on the board.
- * @param direction - The direction in which the block should be moved.
- * @returns A boolean indicating whether the block can be moved in the given direction.
- */
-export const canMoveBlock = (
-  block: BlockPosition,
-  oldBlocks: BlockPosition[],
-  moveLogic: (pos: Position<number>) => Position<number>,
-  boundaryCheck: (cubePos: CubePosition) => boolean
-): boolean => {
-  // Check if the block has reached the boundary or collided with another block
-  return (
-    !block.some(boundaryCheck) &&
-    !hasObjectCollided(moveLogic)(block)(oldBlocks)
-  );
-};
 
 /**
  * Checks if a block has reached the bottom of the board.
@@ -261,115 +335,6 @@ export const updateTickRate = (
   }
   // Otherwise, the tick rate remains the same
   return currentTickRate;
-};
-
-/**
- * A higher-order function that creates a function to move a block in a specified direction.
- * @param direction - The direction to move the block.
- * @param boundaryCheck - A function that checks if the block has reached the boundary.
- * @returns A function that takes the current block, old blocks, and game end status, and returns the new block position.
- */
-const createMoveBlockAction =
-  (
-    moveLogic: (pos: Position<number>) => Position<number>,
-    boundaryCheck: (cubePos: CubePosition) => boolean
-  ) =>
-  (
-    currentBlock: Block,
-    oldBlocks: BlockPosition[],
-    gameEnd: boolean
-  ): Block => {
-    // If there is no current block, the game has ended, the block has reached the boundary, or the block has collided with any old block, it returns the current block without moving it
-    if (
-      !currentBlock ||
-      gameEnd ||
-      currentBlock.some(boundaryCheck) ||
-      hasObjectCollided(moveLogic)(currentBlock)(oldBlocks)
-    ) {
-      return currentBlock;
-    }
-
-    // Otherwise, it moves the block in the specified direction
-    return move(moveLogic)(currentBlock);
-  };
-
-/**
- * Function to move the block to the left.
- * It uses the createMoveBlockAction function with move logic and boundary check for left movement.
- */
-export const moveBlockDown = createMoveBlockAction(
-  moveDownLogic,
-  (cubePos) => cubePos.y + 1 >= Constants.GRID_HEIGHT
-);
-export const moveBlockLeft = createMoveBlockAction(
-  moveLeftLogic,
-  (cubePos) => cubePos.x - 1 < 0
-);
-export const moveBlockRight = createMoveBlockAction(
-  moveRightLogic,
-  (cubePos) => cubePos.x + 1 >= Constants.GRID_WIDTH
-);
-/**
- * Function to rotate the current block.
- * @param currentBlock - The block that needs to be rotated.
- * @param oldBlocks - The blocks that have already been placed.
- * @param gameEnd - Indicates if the game has ended.
- * @returns The new position of the block after rotation. If the rotation is not possible, it returns the current block without rotating.
- */
-export const rotateBlock = (
-  currentBlock: Block,
-  oldBlocks: BlockPosition[],
-  gameEnd: boolean,
-  isClockwise: boolean
-): Block => {
-  // If there is no current block or the game has ended, it returns the current block without rotating it
-  if (!currentBlock || gameEnd) {
-    return currentBlock;
-  }
-
-  const rotatedBlock = rotate(currentBlock, isClockwise);
-
-  // Checks if the rotated block is still within the grid and doesn't hit any old blocks
-  if (
-    rotatedBlock.some(
-      (cubePos) =>
-        cubePos.x < 0 ||
-        cubePos.x >= Constants.GRID_WIDTH ||
-        cubePos.y < 0 ||
-        cubePos.y >= Constants.GRID_HEIGHT
-    ) ||
-    hasObjectCollidedDown(rotatedBlock)(oldBlocks) ||
-    hasObjectCollidedLeft(rotatedBlock)(oldBlocks) ||
-    hasObjectCollidedRight(rotatedBlock)(oldBlocks)
-  ) {
-    // If not, it returns the current block without rotating it
-    return currentBlock;
-  }
-
-  // If the rotated block is valid, it returns the rotated block
-  return rotatedBlock;
-};
-
-/*
- * Provides simple API for rotating blocks clockwise
- */
-export const rotateBlockClockwise = (
-  currentBlock: Block,
-  oldBlocks: BlockPosition[],
-  gameEnd: boolean
-): Block => {
-  return rotateBlock(currentBlock, oldBlocks, gameEnd, true);
-};
-
-/*
- * Provides simple API for rotating blocks anticlockwise
- */
-export const rotateBlockAntiClockwise = (
-  currentBlock: Block,
-  oldBlocks: BlockPosition[],
-  gameEnd: boolean
-): Block => {
-  return rotateBlock(currentBlock, oldBlocks, gameEnd, false);
 };
 
 /**
