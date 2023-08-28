@@ -1,6 +1,12 @@
 import { Constants } from "./constants";
 import { generateRandomBlock } from "./shapes";
-import { Block, BlockPosition, CubePosition, Direction } from "./types";
+import {
+  Block,
+  BlockPosition,
+  CubePosition,
+  Direction,
+  Position,
+} from "./types";
 
 /**
  * Generates a new current block and a new next block.
@@ -24,55 +30,46 @@ export const generateBlock = (
  * @returns A function that moves a block in the given direction.
  */
 export const move =
-  (direction: Direction) =>
+  (movelogic: (pos: Position<number>) => Position<number>) =>
   (block: BlockPosition): BlockPosition =>
-    block.map((pos) => {
-      switch (direction) {
-        case "Down":
-          return { ...pos, y: pos.y + 1 };
-        case "Left":
-          return { ...pos, x: pos.x - 1 };
-        case "Right":
-          return { ...pos, x: pos.x + 1 };
-      }
-    });
+    block.map(movelogic);
+
+const moveDownLogic = (pos: Position<number>) => ({ ...pos, y: pos.y + 1 });
+const moveLeftLogic = (pos: Position<number>) => ({ ...pos, x: pos.x - 1 });
+const moveRightLogic = (pos: Position<number>) => ({ ...pos, x: pos.x + 1 });
 
 /*
  * Returns a function that moves a block down.
  */
-const moveDown = move("Down");
-
+// const moveDown = move("Down");
+//
 /**
  * Returns a function that checks if an object has collided with another object in a given direction.
  * @param direction - The direction in which the collision should be checked.
  * @returns A function that checks if an object has collided with another object in the given direction.
  */
 export const hasObjectCollided = (
-  direction: Direction
+  moveLogic: (pos: Position<number>) => Position<number>
 ): ((objectPos: BlockPosition) => (oldObjects: BlockPosition[]) => boolean) => {
-  // Define an object that maps each direction to a function that checks if a cube has collided with another cube in that direction
-  const hitCheck: Record<
-    Direction,
-    (oldPos: CubePosition, pos: CubePosition) => boolean
-  > = {
-    Down: (oldPos, pos) => oldPos.y === pos.y + 1 && oldPos.x === pos.x,
-    Left: (oldPos, pos) => oldPos.x === pos.x - 1 && oldPos.y === pos.y,
-    Right: (oldPos, pos) => oldPos.x === pos.x + 1 && oldPos.y === pos.y,
+  // Define a function that checks if a cube has collided with another cube after applying the move logic
+  const hitCheck = (oldPos: CubePosition, pos: CubePosition) => {
+    const newPos = moveLogic(pos);
+    return oldPos.x === newPos.x && oldPos.y === newPos.y;
   };
 
-  // Return a function that checks if an object has collided with another object in the given direction
+  // Return a function that checks if an object has collided with another object after applying the move logic
   return (objectPos: BlockPosition) =>
     (oldObjects: BlockPosition[]): boolean =>
       oldObjects.some((oldObject) =>
         oldObject.some((oldPos) =>
-          objectPos.some((pos) => hitCheck[direction](oldPos, pos))
+          objectPos.some((pos) => hitCheck(oldPos, pos))
         )
       );
 };
 
-const hasObjectCollidedDown = hasObjectCollided("Down");
-const hasObjectCollidedLeft = hasObjectCollided("Left");
-const hasObjectCollidedRight = hasObjectCollided("Right");
+const hasObjectCollidedDown = hasObjectCollided(moveDownLogic);
+const hasObjectCollidedLeft = hasObjectCollided(moveLeftLogic);
+const hasObjectCollidedRight = hasObjectCollided(moveRightLogic);
 
 /**
  * Rotates a block clockwise.
@@ -119,25 +116,14 @@ const rotate = (object: BlockPosition, isClockwise: boolean): BlockPosition => {
 export const canMoveBlock = (
   block: BlockPosition,
   oldBlocks: BlockPosition[],
-  direction: Direction
+  moveLogic: (pos: Position<number>) => Position<number>,
+  boundaryCheck: (cubePos: CubePosition) => boolean
 ): boolean => {
-  if (direction === "Down") {
-    // Check if the block has reached the bottom of the board or collided with another block
-    return (
-      !hasBlockReachedBottom(block) &&
-      !hasObjectCollided(direction)(block)(oldBlocks)
-    );
-  } else {
-    const moveDirection = direction === "Left" ? -1 : 1;
-    // Check if the block will go out of bounds or collide with another block
-    return (
-      !block.some(
-        (cubePos) =>
-          cubePos.x + moveDirection < 0 ||
-          cubePos.x + moveDirection >= Constants.GRID_WIDTH
-      ) && !hasObjectCollided(direction)(block)(oldBlocks)
-    );
-  }
+  // Check if the block has reached the boundary or collided with another block
+  return (
+    !block.some(boundaryCheck) &&
+    !hasObjectCollided(moveLogic)(block)(oldBlocks)
+  );
 };
 
 /**
@@ -290,7 +276,10 @@ export const updateTickRate = (
  * @returns A function that takes the current block, old blocks, and game end status, and returns the new block position.
  */
 const createMoveBlockAction =
-  (direction: Direction, boundaryCheck: (cubePos: CubePosition) => boolean) =>
+  (
+    moveLogic: (pos: Position<number>) => Position<number>,
+    boundaryCheck: (cubePos: CubePosition) => boolean
+  ) =>
   (
     currentBlock: Block,
     oldBlocks: BlockPosition[],
@@ -301,33 +290,31 @@ const createMoveBlockAction =
       !currentBlock ||
       gameEnd ||
       currentBlock.some(boundaryCheck) ||
-      hasObjectCollided(direction)(currentBlock)(oldBlocks)
+      hasObjectCollided(moveLogic)(currentBlock)(oldBlocks)
     ) {
       return currentBlock;
     }
 
     // Otherwise, it moves the block in the specified direction
-    return move(direction)(currentBlock);
+    return move(moveLogic)(currentBlock);
   };
 
 /**
  * Function to move the block to the left.
- * It uses the createMoveBlockAction function with "Left" direction and boundary check for left movement.
+ * It uses the createMoveBlockAction function with move logic and boundary check for left movement.
  */
+export const moveBlockDown = createMoveBlockAction(
+  moveDownLogic,
+  (cubePos) => cubePos.y + 1 >= Constants.GRID_HEIGHT
+);
 export const moveBlockLeft = createMoveBlockAction(
-  "Left",
+  moveLeftLogic,
   (cubePos) => cubePos.x - 1 < 0
 );
-
-/**
- * Function to move the block to the right.
- * It uses the createMoveBlockAction function with "Right" direction and boundary check for right movement.
- */
 export const moveBlockRight = createMoveBlockAction(
-  "Right",
+  moveRightLogic,
   (cubePos) => cubePos.x + 1 >= Constants.GRID_WIDTH
 );
-
 /**
  * Function to rotate the current block.
  * @param currentBlock - The block that needs to be rotated.
@@ -410,7 +397,7 @@ export const moveCurrentBlockDown = (
     return undefined;
   } else {
     // Otherwise, it moves the block down
-    return moveDown(currentBlock);
+    return move(moveDownLogic)(currentBlock);
   }
 };
 
