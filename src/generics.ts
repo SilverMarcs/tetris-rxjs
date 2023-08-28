@@ -338,6 +338,20 @@ export const updateTickRate = (
 };
 
 /**
+ * Returns the tick speed based on the score.
+ * If the score is greater than or equal to the difficulty barrier score, it returns the tick rate decrease in milliseconds.
+ * Otherwise, it returns the tick rate in milliseconds.
+ * @param score The current score.
+ * @returns The tick speed in milliseconds.
+ */
+export const getTickRate = (score: number) => {
+  if (score >= Constants.DIFFICULTY_BARRIER_SCORE) {
+    return Constants.TICK_RATE_DECREASE_MS;
+  }
+  return Constants.TICK_RATE_MS;
+};
+
+/**
  * Holds the current block and the hold block.
  * @param currentBlock - The current block to be held.
  * @param holdBlock - The block to be held.
@@ -383,18 +397,4 @@ export const setCurrentBlock = (
     const { newCurrentBlock, newNextBlock } = generateBlock(nextBlock);
     return { newCurrentBlock, newNextBlock };
   }
-};
-
-/**
- * Returns the tick speed based on the score.
- * If the score is greater than or equal to the difficulty barrier score, it returns the tick rate decrease in milliseconds.
- * Otherwise, it returns the tick rate in milliseconds.
- * @param score The current score.
- * @returns The tick speed in milliseconds.
- */
-export const getTickSpeed = (score: number) => {
-  if (score >= Constants.DIFFICULTY_BARRIER_SCORE) {
-    return Constants.TICK_RATE_DECREASE_MS;
-  }
-  return Constants.TICK_RATE_MS;
 };

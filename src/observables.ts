@@ -10,7 +10,7 @@ import {
   withLatestFrom,
 } from "rxjs/operators";
 import { gameActions, initialState } from "./game";
-import { getTickSpeed } from "./generics"; // replace with actual module path
+import { getTickRate } from "./generics"; // replace with actual module path
 import { Event, Key, State } from "./types"; // replace with actual module path
 
 // Create an observable for keydown events
@@ -60,7 +60,7 @@ export const score$ = new BehaviorSubject(0);
 
 // Create a stream of ticks and/or game speed based on the score
 export const tick$ = score$.pipe(
-  switchMap((score) => interval(getTickSpeed(score))),
+  switchMap((score) => interval(getTickRate(score))),
   map(() => "Tick" as Event)
 );
 
