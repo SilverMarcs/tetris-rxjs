@@ -7,10 +7,10 @@ export type Block = BlockPosition | undefined; // this can be undefined because 
 
 export type Key = "KeyA" | "KeyD" | "KeyH" | "KeyQ" | "KeyE";
 
-export type Direction = "Left" | "Right" | "Down";
-
+export type Direction = "Left" | "Right";
 export type Rotation = "RotateClockwise" | "RotateAntiClockwise";
-export type Movement = Direction | Rotation | "Hold";
+
+export type Event = Direction | Rotation | "Hold" | "Tick";
 
 export type State = Readonly<{
   gameEnd: boolean;

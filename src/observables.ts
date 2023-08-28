@@ -11,7 +11,7 @@ import {
 } from "rxjs/operators";
 import { gameActions, initialState } from "./game";
 import { getTickSpeed } from "./generics"; // replace with actual module path
-import { Key, Movement, State } from "./types"; // replace with actual module path
+import { Event, Key, State } from "./types"; // replace with actual module path
 
 // Create an observable for keydown events
 export const key$ = fromEvent<KeyboardEvent>(document, "keydown");
@@ -20,27 +20,27 @@ export const key$ = fromEvent<KeyboardEvent>(document, "keydown");
 const fromKey = (keyCode: Key) =>
   filter((e: KeyboardEvent) => e.code === keyCode);
 
-export const left$: Observable<Movement> = key$.pipe(
+export const left$: Observable<Event> = key$.pipe(
   fromKey("KeyA"),
   map((_) => "Left")
 );
 
-export const right$: Observable<Movement> = key$.pipe(
+export const right$: Observable<Event> = key$.pipe(
   fromKey("KeyD"),
   map((_) => "Right")
 );
 
-export const rotateClockwise$: Observable<Movement> = key$.pipe(
+export const rotateClockwise$: Observable<Event> = key$.pipe(
   fromKey("KeyE"),
   map((_) => "RotateClockwise")
 );
 
-export const rotateAntiClockwise$: Observable<Movement> = key$.pipe(
+export const rotateAntiClockwise$: Observable<Event> = key$.pipe(
   fromKey("KeyQ"),
   map((_) => "RotateAntiClockwise")
 );
 
-export const hold$: Observable<Movement> = key$.pipe(
+export const hold$: Observable<Event> = key$.pipe(
   fromKey("KeyH"),
   map((_) => "Hold")
 );
@@ -61,14 +61,11 @@ export const score$ = new BehaviorSubject(0);
 // Create a stream of ticks and/or game speed based on the score
 export const tick$ = score$.pipe(
   switchMap((score) => interval(getTickSpeed(score))),
-  map(() => "Down" as Movement)
+  map(() => "Tick" as Event)
 );
 
 export const game$ = merge(movements$, tick$).pipe(
-  scan(
-    (state: State, event: Movement) => gameActions[event](state),
-    initialState
-  ),
+  scan((state: State, event: Event) => gameActions[event](state), initialState),
   tap((state: State) => {
     if (state.gameEnd && state.score > highScore$.value) {
       highScore$.next(state.score);

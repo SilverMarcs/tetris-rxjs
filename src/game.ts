@@ -1,18 +1,19 @@
 import {
   clearFullRows,
   generateBlock,
+  hasBlockReachedBottom,
   hasBlockReachedTop,
+  hasObjectCollidedDown,
   holdCurrentBlock,
+  moveBlockDown,
   moveBlockLeft,
   moveBlockRight,
-  moveCurrentBlockDown,
-  rotateBlock,
   rotateBlockAntiClockwise,
   rotateBlockClockwise,
   setCurrentBlock,
 } from "./generics";
 
-import { Block, BlockPosition, Movement, State } from "./types";
+import { Block, BlockPosition, Event, State } from "./types";
 
 /**
  * The initial state of the game.
@@ -36,8 +37,6 @@ export const tick = (state: State): State => {
   // Check if the game is over (a block has reached the top)
   const gameOver = hasBlockReachedTop(newBlocks);
 
-  // Calculate the high score
-
   // If the game is over, return the updated state with gameEnd set to true
   if (gameOver) {
     return {
@@ -51,25 +50,31 @@ export const tick = (state: State): State => {
   // Generate a new block
   const { newCurrentBlock, newNextBlock } = generateBlock(state.nextBlock);
 
-  // Try to move the current block down
-  const movedCurrentBlock = moveCurrentBlockDown(
-    state.oldBlocks,
-    state.currentBlock
-  );
+  // Check if the current block has reached the bottom or collided with another block
+  const hasLanded =
+    !state.currentBlock ||
+    hasBlockReachedBottom(state.currentBlock) ||
+    hasObjectCollidedDown(state.currentBlock)(state.oldBlocks);
 
-  // If the current block couldn't be moved down, it means it has landed
-  if (!movedCurrentBlock) {
+  // If the current block has landed, add it to oldBlocks and generate a new current block
+  if (hasLanded) {
     return {
       ...state,
       currentBlock: newCurrentBlock, // Set the current block to the next block
       nextBlock: newNextBlock, // Generate a new next block
-      oldBlocks: state.currentBlock
-        ? [...newBlocks, state.currentBlock] // Add the landed block to the old blocks
-        : newBlocks,
+      oldBlocks: [
+        ...newBlocks,
+        ...(state.currentBlock ? [state.currentBlock] : []),
+      ], // Add the landed block to the old blocks
       score: newScore,
     };
   } else {
-    // If the current block could be moved down, return the updated state with the moved block
+    // If the current block hasn't landed, try to move it down
+    const movedCurrentBlock = moveBlockDown(
+      state.currentBlock,
+      state.oldBlocks,
+      state.gameEnd
+    );
     return {
       ...state,
       currentBlock: movedCurrentBlock,
@@ -100,12 +105,12 @@ const createGameAction = (
 /**
  * The game actions that can be performed.
  */
-export const gameActions: { [key in Movement]: (s: State) => State } = {
+export const gameActions: { [key in Event]: (s: State) => State } = {
   Left: createGameAction(moveBlockLeft),
   Right: createGameAction(moveBlockRight),
   RotateClockwise: createGameAction(rotateBlockClockwise),
   RotateAntiClockwise: createGameAction(rotateBlockAntiClockwise),
-  Down: (s: State) => tick(s),
+  Tick: (s: State) => tick(s),
   Hold: (s: State) => {
     const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(
       s.currentBlock,

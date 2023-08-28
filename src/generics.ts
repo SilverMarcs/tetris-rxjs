@@ -1,12 +1,6 @@
 import { Constants } from "./constants";
 import { generateRandomBlock } from "./shapes";
-import {
-  Block,
-  BlockPosition,
-  CubePosition,
-  Direction,
-  Position,
-} from "./types";
+import { Block, BlockPosition, CubePosition, Position } from "./types";
 
 /**
  * Generates a new current block and a new next block.
@@ -67,7 +61,7 @@ export const hasObjectCollided = (
       );
 };
 
-const hasObjectCollidedDown = hasObjectCollided(moveDownLogic);
+export const hasObjectCollidedDown = hasObjectCollided(moveDownLogic);
 const hasObjectCollidedLeft = hasObjectCollided(moveLeftLogic);
 const hasObjectCollidedRight = hasObjectCollided(moveRightLogic);
 
@@ -376,29 +370,6 @@ export const rotateBlockAntiClockwise = (
   gameEnd: boolean
 ): Block => {
   return rotateBlock(currentBlock, oldBlocks, gameEnd, false);
-};
-
-/**
- * Function to move the current block down.
- * @param oldBlocks - The blocks that have already been placed.
- * @param currentBlock - The block that needs to be moved down.
- * @returns The new position of the block after moving it down. If the movement is not possible, it returns undefined.
- */
-export const moveCurrentBlockDown = (
-  oldBlocks: BlockPosition[],
-  currentBlock: Block
-): Block => {
-  // If there is no current block or the block has reached the bottom or the block has collided with any old block, it returns undefined
-  if (
-    !currentBlock ||
-    hasBlockReachedBottom(currentBlock) ||
-    hasObjectCollidedDown(currentBlock)(oldBlocks)
-  ) {
-    return undefined;
-  } else {
-    // Otherwise, it moves the block down
-    return move(moveDownLogic)(currentBlock);
-  }
 };
 
 /**
