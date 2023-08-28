@@ -45,11 +45,22 @@ export const renderBlock = (block: BlockPosition, svg: SVGElement) =>
   block.forEach(createCube(svg, "green"));
 
 export const renderOldBlocks = (oldBlocks: BlockPosition[], svg: SVGElement) =>
-  oldBlocks.flat().forEach(createCube(svg, "red"));
+  oldBlocks.flat().forEach(createCube(svg, "green"));
 
 export const renderPreview = (block: BlockPosition, preview: SVGElement) => {
   while (preview.firstChild) preview.firstChild.remove();
-  block.forEach(createCube(preview, "green"));
+
+  // we take relative position of each cube in the block since we want to render the block in the middle of the preview
+  // this is not by default as the positions are actually the random x and y positions from the block generator
+  const minX = Math.min(...block.map((pos) => pos.x));
+  const minY = Math.min(...block.map((pos) => pos.y));
+
+  const relativeBlock = block.map(({ x, y }) => ({
+    x: x - minX + 3,
+    y: y - minY + 1,
+  }));
+
+  relativeBlock.forEach(createCube(preview, "purple"));
 };
 
 export const render = (
