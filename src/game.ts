@@ -54,7 +54,7 @@ export const tick = (state: State): State => {
   const hasLanded =
     !state.currentBlock ||
     hasBlockReachedBottom(state.currentBlock) ||
-    hasObjectCollidedDown(state.currentBlock)(state.oldBlocks);
+    hasObjectCollidedDown(state.currentBlock, state.oldBlocks);
 
   // If the current block has landed, add it to oldBlocks and generate a new current block
   if (hasLanded) {

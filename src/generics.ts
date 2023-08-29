@@ -53,7 +53,7 @@ const createMoveBlockAction =
     if (
       !currentBlock ||
       currentBlock.some(boundaryCheck) ||
-      hasObjectCollided(moveLogic)(currentBlock)(oldBlocks)
+      hasObjectCollided(moveLogic, currentBlock, oldBlocks)
     ) {
       return currentBlock;
     }
@@ -143,9 +143,9 @@ const createRotateBlockAction =
           cubePos.y < 0 ||
           cubePos.y >= Constants.GRID_HEIGHT
       ) ||
-      hasObjectCollidedDown(rotatedBlock)(oldBlocks) ||
-      hasObjectCollidedLeft(rotatedBlock)(oldBlocks) ||
-      hasObjectCollidedRight(rotatedBlock)(oldBlocks)
+      hasObjectCollidedDown(rotatedBlock, oldBlocks) ||
+      hasObjectCollidedLeft(rotatedBlock, oldBlocks) ||
+      hasObjectCollidedRight(rotatedBlock, oldBlocks)
     ) {
       // If not, it returns the current block without rotating it
       return currentBlock;
@@ -166,37 +166,52 @@ export const rotateBlockAntiClockwise = createRotateBlockAction((block) =>
 );
 
 /**
- * Returns a function that checks if an object has collided with another object after applying the move logic.
+ * Returns a function that checks if a block has collided with another block after applying the move logic.
  * @param moveLogic A function that takes in a position and returns a new position after applying the move logic.
- * @returns A function that takes in an object position and an array of old object positions, and returns a boolean indicating if the object has collided with any of the old objects.
+ * @returns A function that takes in an block position and an array of old block positions, and returns a boolean indicating if the block has collided with any of the old blocks.
  */
 export const hasObjectCollided = (
-  moveLogic: (pos: Position<number>) => Position<number>
-): ((objectPos: BlockPosition) => (oldObjects: BlockPosition[]) => boolean) => {
+  moveLogic: (pos: Position<number>) => Position<number>,
+  block: BlockPosition,
+  oldBlocks: BlockPosition[]
+): boolean => {
   // Define a function that checks if a cube has collided with another cube after applying the move logic
   const hitCheck = (oldPos: CubePosition, pos: CubePosition) => {
     const newPos = moveLogic(pos);
     return oldPos.x === newPos.x && oldPos.y === newPos.y;
   };
 
-  // Return a function that checks if an object has collided with another object after applying the move logic
-  return (objectPos: BlockPosition) =>
-    (oldObjects: BlockPosition[]): boolean =>
-      oldObjects.some((oldObject) =>
-        oldObject.some((oldPos) =>
-          objectPos.some((pos) => hitCheck(oldPos, pos))
-        )
-      );
+  // Check if an object has collided with another object after applying the move logic
+  return oldBlocks.some((oldObject) =>
+    oldObject.some((oldPos) => block.some((pos) => hitCheck(oldPos, pos)))
+  );
 };
 
+// check if the object has collided with any old blocks after moving down
+export const hasObjectCollidedDown = (
+  block: BlockPosition,
+  oldObjects: BlockPosition[]
+) => hasObjectCollided(moveDownLogic, block, oldObjects);
+
+// check if the current block has collided with any old blocks after moving left
+const hasObjectCollidedLeft = (
+  block: BlockPosition,
+  oldObjects: BlockPosition[]
+) => hasObjectCollided(moveLeftLogic, block, oldObjects);
+
+const hasObjectCollidedRight = (
+  block: BlockPosition,
+  oldObjects: BlockPosition[]
+) => hasObjectCollided(moveRightLogic, block, oldObjects);
+
 // Checks if an object has collided with another object after moving down.
-export const hasObjectCollidedDown = hasObjectCollided(moveDownLogic);
+// export const hasObjectCollidedDown = hasObjectCollided(moveDownLogic);
 
 // Checks if an object has collided with another object after moving left.
-const hasObjectCollidedLeft = hasObjectCollided(moveLeftLogic);
+// const hasObjectCollidedLeft = hasObjectCollided(moveLeftLogic);
 
-// Checks if an object has collided with another object after moving right.
-const hasObjectCollidedRight = hasObjectCollided(moveRightLogic);
+// // Checks if an object has collided with another object after moving right.
+// const hasObjectCollidedRight = hasObjectCollided(moveRightLogic);
 
 /**
  * Checks if a block has reached the bottom of the board.
