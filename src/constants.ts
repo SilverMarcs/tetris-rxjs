@@ -6,8 +6,8 @@ export const Viewport = {
 } as const;
 
 export const Constants = {
-  TICK_RATE_MS: 135, // default tick rate
-  TICK_RATE_DECREASE_MS: 105, // tick rate after DIFFICULTY_BARRIER_SCORE is reached
+  TICK_RATE_MS: 150, // default tick rate
+  TICK_RATE_DECREASE_MS: 100, // tick rate after DIFFICULTY_BARRIER_SCORE is reached
   DIFFICULTY_BARRIER_SCORE: 200, // score at which the game gets harder
   GRID_WIDTH: 10, // width of the grid
   GRID_HEIGHT: 20, // height of the grid
