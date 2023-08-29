@@ -237,23 +237,19 @@ export const dropBlocksAboveClearedRows = (
   );
 
 /**
- * Calculates the rows on the board.
- * @param oldBlocks - The existing blocks on the board.
- * @returns An array of arrays containing the positions of the cubes in each row.
+ * Calculates the rows of cubes in the grid based on the given blocks.
+ * @param oldBlocks The blocks to calculate the rows from.
+ * @returns An array of cube positions representing the rows in the grid.
  */
 export const calculateRows = (oldBlocks: BlockPosition[]): CubePosition[][] => {
-  // Create an array of empty arrays, one for each row on the board
-  const rows: CubePosition[][] = Array.from(
-    { length: Constants.GRID_HEIGHT },
-    () => []
+  // Create an array of length GRID_HEIGHT and map each element to an array of cubes that belong to that row
+  return Array.from({ length: Constants.GRID_HEIGHT }, (_, index) =>
+    // Reduce the oldBlocks array to an array of cubes that belong to the current row
+    oldBlocks.reduce(
+      (row, block) => row.concat(block.filter((cube) => cube.y === index)),
+      [] as CubePosition[]
+    )
   );
-
-  // Add each cube to the array for its row
-  oldBlocks.forEach((block) =>
-    block.forEach((cube) => rows[cube.y].push(cube))
-  );
-
-  return rows;
 };
 
 /**
