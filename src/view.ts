@@ -42,10 +42,10 @@ function createGameOverElement(svg: SVGElement) {
 }
 
 export const renderBlock = (block: BlockPosition, svg: SVGElement) =>
-  block.forEach(createCube(svg, "green"));
+  block.map(createCube(svg, "green"));
 
 export const renderOldBlocks = (oldBlocks: BlockPosition[], svg: SVGElement) =>
-  oldBlocks.flat().forEach(createCube(svg, "green"));
+  oldBlocks.flatMap((block) => block).forEach(createCube(svg, "green"));
 
 export const renderPreview = (block: BlockPosition, preview: SVGElement) => {
   while (preview.firstChild) preview.firstChild.remove();
@@ -60,7 +60,7 @@ export const renderPreview = (block: BlockPosition, preview: SVGElement) => {
     y: y - minY + 1,
   }));
 
-  relativeBlock.forEach(createCube(preview, "purple"));
+  relativeBlock.map(createCube(preview, "brown"));
 };
 
 export const render = (
