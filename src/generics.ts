@@ -19,24 +19,29 @@ export const generateBlock = (
 };
 
 /**
- * Returns a function that moves a block in a given direction.
- * @param direction - The direction in which the block should be moved.
- * @returns A function that moves a block in the given direction.
+ * Applies the given move logic function to the block's position and returns the new block position.
+ * @param movelogic - The move logic function to apply to the block's position.
+ * @returns A new block position after applying the move logic function.
  */
 export const move =
   (movelogic: (pos: Position<number>) => Position<number>) =>
   (block: BlockPosition): BlockPosition =>
     block.map(movelogic);
 
+// Logic for moving the current block down by one unit
 const moveDownLogic = (pos: Position<number>) => ({ ...pos, y: pos.y + 1 });
+
+// Logic for moving the current block left by one unit
 const moveLeftLogic = (pos: Position<number>) => ({ ...pos, x: pos.x - 1 });
+
+// Logic for moving the current block right by one unit
 const moveRightLogic = (pos: Position<number>) => ({ ...pos, x: pos.x + 1 });
 
 /**
- * A higher-order function that creates a function to move a block in a specified direction.
- * @param direction - The direction to move the block.
- * @param boundaryCheck - A function that checks if the block has reached the boundary.
- * @returns A function that takes the current block, old blocks, and game end status, and returns the new block position.
+ * Creates a function that moves a block in a specified direction based on the provided move logic and boundary check functions.
+ * @param moveLogic A function that takes the current position of the block and returns the new position after moving in a specified direction.
+ * @param boundaryCheck A function that takes the current position of the block and returns true if the block has reached the boundary, false otherwise.
+ * @returns A function that takes the current block, an array of old blocks, and a boolean indicating if the game has ended, and returns the new position of the block after moving in the specified direction.
  */
 const createMoveBlockAction =
   (
@@ -62,28 +67,30 @@ const createMoveBlockAction =
     return move(moveLogic)(currentBlock);
   };
 
+// Moves the current block down by one unit and specifies the boundary to check
 export const moveBlockDown = createMoveBlockAction(
   moveDownLogic,
   (cubePos) => cubePos.y + 1 >= Constants.GRID_HEIGHT
 );
 
+// Moves the current block left by one unit and specifies the boundary to check
 export const moveBlockLeft = createMoveBlockAction(
   moveLeftLogic,
   (cubePos) => cubePos.x - 1 < 0
 );
 
+// Moves the current block right by one unit and specifies the boundary to check
 export const moveBlockRight = createMoveBlockAction(
   moveRightLogic,
   (cubePos) => cubePos.x + 1 >= Constants.GRID_WIDTH
 );
 
 /**
- * Rotates a block clockwise.
- * @param object - The block to be rotated.
- * @returns The rotated block.
+ * Generic function to rotates a block of cubes around its center using the provided rotate logic.
+ * @param object The block of cubes to rotate.
+ * @param rotateLogic The function that defines how each cube should be rotated around the center.
+ * @returns The rotated block of cubes.
  */
-
-// Common rotate function
 const rotate = (
   object: BlockPosition,
   rotateLogic: (pos: CubePosition, center: CubePosition) => CubePosition
@@ -105,22 +112,22 @@ const rotate = (
   return object.map((pos) => rotateLogic(pos, adjustedCenter));
 };
 
+// defines logic for rotating a block clockwise
 const rotateClockwiseLogic = (pos: CubePosition, center: CubePosition) => ({
   x: center.x - pos.y + center.y,
   y: center.y + pos.x - center.x,
 });
 
+// defines logic for rotating a block anticlockwise
 const rotateAntiClockwiseLogic = (pos: CubePosition, center: CubePosition) => ({
   x: center.x + pos.y - center.y,
   y: center.y - pos.x + center.x,
 });
 
 /**
- * Function to rotate the current block.
- * @param currentBlock - The block that needs to be rotated.
- * @param oldBlocks - The blocks that have already been placed.
- * @param gameEnd - Indicates if the game has ended.
- * @returns The new position of the block after rotation. If the rotation is not possible, it returns the current block without rotating.
+ * Creates a function that rotates the current block using the provided rotate logic.
+ * @param rotateLogic A function that takes the current block and returns the rotated block.
+ * @returns A function that takes the current block, an array of old blocks, and a boolean indicating if the game has ended, and returns the rotated block.
  */
 const createRotateBlockAction =
   (rotateLogic: (pos: BlockPosition) => BlockPosition) =>
@@ -157,19 +164,20 @@ const createRotateBlockAction =
     return rotatedBlock;
   };
 
-// Use the rotate logic functions to define the rotate block actions
+// Use the rotate logic functions to define the rotate block actions in clockwise direction
 export const rotateBlockClockwise = createRotateBlockAction((block) =>
   rotate(block, rotateClockwiseLogic)
 );
 
+// Use the rotate logic functions to define the rotate block actions in anticlockwise direction
 export const rotateBlockAntiClockwise = createRotateBlockAction((block) =>
   rotate(block, rotateAntiClockwiseLogic)
 );
 
 /**
- * Returns a function that checks if an object has collided with another object in a given direction.
- * @param direction - The direction in which the collision should be checked.
- * @returns A function that checks if an object has collided with another object in the given direction.
+ * Returns a function that checks if an object has collided with another object after applying the move logic.
+ * @param moveLogic A function that takes in a position and returns a new position after applying the move logic.
+ * @returns A function that takes in an object position and an array of old object positions, and returns a boolean indicating if the object has collided with any of the old objects.
  */
 export const hasObjectCollided = (
   moveLogic: (pos: Position<number>) => Position<number>
@@ -190,8 +198,13 @@ export const hasObjectCollided = (
       );
 };
 
-export const hasObjectCollidedDown = hasObjectCollided(moveDownLogic); // need to export this since a tick in the game needs this
+// Checks if an object has collided with another object after moving down.
+export const hasObjectCollidedDown = hasObjectCollided(moveDownLogic);
+
+// Checks if an object has collided with another object after moving left.
 const hasObjectCollidedLeft = hasObjectCollided(moveLeftLogic);
+
+// Checks if an object has collided with another object after moving right.
 const hasObjectCollidedRight = hasObjectCollided(moveRightLogic);
 
 /**

@@ -85,7 +85,7 @@ export const tick = (state: State): State => {
 };
 
 /**
- * Creates a game action based on the given movement.
+ * Creates a game action based on the given action logic.
  * @param action - The action to perform.
  * @returns The new game state after the action.
  */
