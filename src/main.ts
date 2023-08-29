@@ -1,7 +1,7 @@
 import "./style.css";
 
 import { Viewport } from "./constants";
-import { game$, highScore$, score$ } from "./observables";
+import { game$, score$ } from "./observables";
 import { State } from "./types";
 import { render } from "./view";
 
@@ -27,19 +27,7 @@ export function main() {
 
   // Subscribe to the game observable and render the game state for each new state
   game$.subscribe((s: State) => {
-    render(
-      s,
-      svg,
-      scoreElement,
-      highScoreElement,
-      highScore$.getValue(),
-      preview
-    );
-
-    // update high score if the game has ended and the score is higher than the current high score
-    if (s.gameEnd && s.score > highScore$.value) {
-      highScore$.next(s.score);
-    }
+    render(s, svg, scoreElement, highScoreElement, preview);
     score$.next(s.score);
   });
 }

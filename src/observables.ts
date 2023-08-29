@@ -1,5 +1,14 @@
-import { BehaviorSubject, Observable, fromEvent, interval, merge } from "rxjs";
 import {
+  BehaviorSubject,
+  Observable,
+  fromEvent,
+  interval,
+  merge,
+  of,
+  timer,
+} from "rxjs";
+import {
+  delayWhen,
   filter,
   map,
   repeat,
@@ -7,6 +16,7 @@ import {
   switchMap,
   takeWhile,
 } from "rxjs/operators";
+import { Constants } from "./constants";
 import { gameActions, initialState } from "./game";
 import { getTickRate } from "./generics"; // replace with actual module path
 import { Event, Key, State } from "./types"; // replace with actual module path
@@ -53,7 +63,6 @@ export const movements$ = merge(
 );
 
 // Create observables for the high score and score. need to use BehaviorSubjects so that we need to extract the values from the state
-export const highScore$ = new BehaviorSubject(0);
 export const score$ = new BehaviorSubject(initialState.score);
 
 // Create a stream of ticks and/or game speed based on the score
@@ -62,8 +71,16 @@ export const tick$ = score$.pipe(
   map(() => "Tick" as Event)
 );
 
+// import { timer } from 'rxjs';
+// import { delayWhen } from 'rxjs/operators';
+
 export const game$ = merge(movements$, tick$).pipe(
-  scan((state: State, event: Event) => gameActions[event](state), initialState),
-  takeWhile((state: State) => !state.gameEnd, true),
-  repeat({ delay: 3000 })
+  scan((state: State, event: Event) => {
+    const newState = gameActions[event](state);
+    if (state.gameEnd) {
+      const updatedState = { ...newState, gameEnd: false };
+      return updatedState;
+    }
+    return newState;
+  }, initialState)
 );

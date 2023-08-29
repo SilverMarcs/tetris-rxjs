@@ -23,6 +23,7 @@ export const initialState: State = {
   oldBlocks: [],
   score: 0,
   nextBlock: undefined,
+  highScore: 0,
 };
 
 /**
@@ -40,10 +41,9 @@ export const tick = (state: State): State => {
   // If the game is over, return the updated state with gameEnd set to true
   if (gameOver) {
     return {
-      ...state,
+      ...initialState,
+      highScore: Math.max(state.highScore, state.score),
       gameEnd: true,
-      oldBlocks: newBlocks,
-      score: newScore,
     };
   }
 
@@ -72,8 +72,7 @@ export const tick = (state: State): State => {
     // If the current block hasn't landed, try to move it down
     const movedCurrentBlock = moveBlockDown(
       state.currentBlock,
-      state.oldBlocks,
-      state.gameEnd
+      state.oldBlocks
     );
     return {
       ...state,

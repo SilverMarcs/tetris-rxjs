@@ -48,15 +48,10 @@ const createMoveBlockAction =
     moveLogic: (pos: Position<number>) => Position<number>,
     boundaryCheck: (cubePos: CubePosition) => boolean
   ) =>
-  (
-    currentBlock: Block,
-    oldBlocks: BlockPosition[],
-    gameEnd: boolean
-  ): Block => {
+  (currentBlock: Block, oldBlocks: BlockPosition[]): Block => {
     // If there is no current block, the game has ended, the block has reached the boundary, or the block has collided with any old block, it returns the current block without moving it
     if (
       !currentBlock ||
-      gameEnd ||
       currentBlock.some(boundaryCheck) ||
       hasObjectCollided(moveLogic)(currentBlock)(oldBlocks)
     ) {
@@ -131,13 +126,9 @@ const rotateAntiClockwiseLogic = (pos: CubePosition, center: CubePosition) => ({
  */
 const createRotateBlockAction =
   (rotateLogic: (pos: BlockPosition) => BlockPosition) =>
-  (
-    currentBlock: Block,
-    oldBlocks: BlockPosition[],
-    gameEnd: boolean
-  ): Block => {
+  (currentBlock: Block, oldBlocks: BlockPosition[]): Block => {
     // If there is no current block or the game has ended, it returns the current block without rotating it
-    if (!currentBlock || gameEnd) {
+    if (!currentBlock) {
       return currentBlock;
     }
 
