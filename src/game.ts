@@ -28,6 +28,7 @@ export const initialState: State = {
 
 /**
  * Updates the game state for each tick (game cycle).
+ * See the functions it invokes for more details.
  * @param state - The current game state.
  * @returns The new game state after the tick.
  */
@@ -40,47 +41,86 @@ export const tick = (state: State): State => {
 
   // If the game is over, return the updated state with gameEnd set to true
   if (gameOver) {
-    return {
-      ...initialState,
-      highScore: Math.max(state.highScore, state.score),
-      gameEnd: true,
-    };
+    return restartGame(state);
   }
 
-  // Generate a new block
-  const { newCurrentBlock, newNextBlock } = generateBlock(state.nextBlock);
-
   // Check if the current block has reached the bottom or collided with another block
-  const hasLanded =
-    !state.currentBlock ||
-    hasBlockReachedBottom(state.currentBlock) ||
-    hasObjectCollidedDown(state.currentBlock, state.oldBlocks);
+  const hasLanded = hasBlockLanded(state.currentBlock, newBlocks);
 
   // If the current block has landed, add it to oldBlocks and generate a new current block
   if (hasLanded) {
-    return {
-      ...state,
-      currentBlock: newCurrentBlock, // Set the current block to the next block
-      nextBlock: newNextBlock, // Generate a new next block
-      oldBlocks: [
-        ...newBlocks,
-        ...(state.currentBlock ? [state.currentBlock] : []),
-      ], // Add the landed block to the old blocks
-      score: newScore,
-    };
+    return updateStateAfterLanding(state);
   } else {
     // If the current block hasn't landed, try to move it down
-    const movedCurrentBlock = moveBlockDown(
-      state.currentBlock,
-      state.oldBlocks
-    );
-    return {
-      ...state,
-      currentBlock: movedCurrentBlock,
-      oldBlocks: newBlocks,
-      score: newScore,
-    };
+    return moveCurrentBlockDown(state, newBlocks, newScore);
   }
+};
+
+/** Utility functions to make tick function more readable. **/
+
+/**
+ * Checks if the current block has landed.
+ * @param currentBlock - The current block.
+ * @param oldBlocks - The old blocks.
+ * @returns Whether the current block has landed.
+ */
+const hasBlockLanded = (currentBlock: Block, oldBlocks: BlockPosition[]) =>
+  !currentBlock ||
+  hasBlockReachedBottom(currentBlock) ||
+  hasObjectCollidedDown(currentBlock, oldBlocks);
+
+/**
+ * Updates the game state after the current block has landed.
+ * @param state - The current game state.
+ * @returns The new game state after the current block has landed.
+ */
+const updateStateAfterLanding = (state: State): State => {
+  const { newBlocks, newScore } = clearFullRows(state.oldBlocks, state.score);
+  const { newCurrentBlock, newNextBlock } = generateBlock(state.nextBlock);
+  return {
+    ...state,
+    currentBlock: newCurrentBlock,
+    nextBlock: newNextBlock,
+    oldBlocks: [
+      ...newBlocks,
+      ...(state.currentBlock ? [state.currentBlock] : []),
+    ],
+    score: newScore,
+  };
+};
+
+/**
+ * Moves the current block down.
+ * @param state - The current game state.
+ * @param newBlocks - The new blocks.
+ * @param newScore - The new score.
+ * @returns The new game state after the current block has moved down.
+ */
+const moveCurrentBlockDown = (
+  state: State,
+  newBlocks: BlockPosition[],
+  newScore: number
+): State => {
+  const movedCurrentBlock = moveBlockDown(state.currentBlock, state.oldBlocks);
+  return {
+    ...state,
+    currentBlock: movedCurrentBlock,
+    oldBlocks: newBlocks,
+    score: newScore,
+  };
+};
+
+/**
+ * Restarts the game.
+ * @param state - The current game state.
+ * @returns The new game state after the game has restarted.
+ */
+const restartGame = (state: State): State => {
+  return {
+    ...initialState,
+    highScore: Math.max(state.highScore, state.score),
+    gameEnd: true,
+  };
 };
 
 /**
