@@ -5,9 +5,9 @@ export type BlockPosition = Position<number>[];
 
 export type Block = BlockPosition | undefined; // this can be undefined because the game starts with no current block or when as block reaches the bottom, there is no current block
 
-export type Key = "KeyA" | "KeyD" | "KeyH" | "KeyQ" | "KeyE";
+export type Key = "KeyA" | "KeyD" | "KeyH" | "KeyQ" | "KeyE" | "KeyS";
 
-export type Direction = "Left" | "Right";
+export type Direction = "Left" | "Right" | "Down";
 export type Rotation = "RotateClockwise" | "RotateAntiClockwise";
 
 export type Event = Direction | Rotation | "Hold" | "Tick";

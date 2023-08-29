@@ -89,14 +89,10 @@ export const tick = (state: State): State => {
  * @returns The new game state after the action.
  */
 const createGameAction = (
-  action: (
-    currentBlock: Block,
-    oldBlocks: BlockPosition[],
-    gameEnd: boolean
-  ) => Block
+  action: (currentBlock: Block, oldBlocks: BlockPosition[]) => Block
 ) => {
   return (s: State): State => {
-    const newBlock = action(s.currentBlock, s.oldBlocks, s.gameEnd);
+    const newBlock = action(s.currentBlock, s.oldBlocks);
     return newBlock ? { ...s, currentBlock: newBlock } : s;
   };
 };
@@ -107,6 +103,7 @@ const createGameAction = (
 export const gameActions: { [key in Event]: (s: State) => State } = {
   Left: createGameAction(moveBlockLeft),
   Right: createGameAction(moveBlockRight),
+  Down: createGameAction(moveBlockDown),
   RotateClockwise: createGameAction(rotateBlockClockwise),
   RotateAntiClockwise: createGameAction(rotateBlockAntiClockwise),
   Tick: (s: State) => tick(s),
