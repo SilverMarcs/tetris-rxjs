@@ -204,15 +204,6 @@ const hasObjectCollidedRight = (
   oldObjects: BlockPosition[]
 ) => hasObjectCollided(moveRightLogic, block, oldObjects);
 
-// Checks if an object has collided with another object after moving down.
-// export const hasObjectCollidedDown = hasObjectCollided(moveDownLogic);
-
-// Checks if an object has collided with another object after moving left.
-// const hasObjectCollidedLeft = hasObjectCollided(moveLeftLogic);
-
-// // Checks if an object has collided with another object after moving right.
-// const hasObjectCollidedRight = hasObjectCollided(moveRightLogic);
-
 /**
  * Checks if a block has reached the bottom of the board.
  * @param blockPos - The position of the block.

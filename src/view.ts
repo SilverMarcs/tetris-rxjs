@@ -23,7 +23,7 @@ const createCube =
     svg.appendChild(cube);
   };
 
-function createGameOverElement(svg: SVGElement) {
+const createGameOverElement = (svg: SVGElement) => {
   const gameOverBox = createSvgElement(svg.namespaceURI, "rect", {
     x: "26",
     y: "120",
@@ -39,7 +39,7 @@ function createGameOverElement(svg: SVGElement) {
   });
   gameOverText.textContent = "Game Over";
   svg.appendChild(gameOverText);
-}
+};
 
 export const renderBlock = (block: BlockPosition, svg: SVGElement) =>
   block.map(createCube(svg, "green"));
