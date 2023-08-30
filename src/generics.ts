@@ -44,10 +44,14 @@ const moveDownLogic: MoveLogic = (pos: Position<number>) => ({
   ...pos,
   y: pos.y + 1,
 });
+
+// Logic for moving the current block left by one unit
 const moveLeftLogic: MoveLogic = (pos: Position<number>) => ({
   ...pos,
   x: pos.x - 1,
 });
+
+// Logic for moving the current block right by one unit
 const moveRightLogic: MoveLogic = (pos: Position<number>) => ({
   ...pos,
   x: pos.x + 1,
@@ -81,11 +85,13 @@ export const moveBlockDown: BlockAction = createMoveBlockAction(
   (cubePos) => cubePos.y + 1 >= Constants.GRID_HEIGHT
 );
 
+// Moves the current block left by one unit and specifies the boundary to check
 export const moveBlockLeft: BlockAction = createMoveBlockAction(
   moveLeftLogic,
   (cubePos) => cubePos.x - 1 < 0
 );
 
+// Moves the current block right by one unit and specifies the boundary to check
 export const moveBlockRight: BlockAction = createMoveBlockAction(
   moveRightLogic,
   (cubePos) => cubePos.x + 1 >= Constants.GRID_WIDTH
