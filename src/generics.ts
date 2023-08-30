@@ -1,6 +1,6 @@
 import { Constants } from "./constants";
 import { generateRandomBlock } from "./shapes";
-import { Block, BlockPosition, CubePosition, Position } from "./types";
+import { Block, BlockPosition, CubePosition, Position, State } from "./types";
 
 /**
  * Generates a new current block and a new next block.

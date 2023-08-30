@@ -3,30 +3,56 @@
     <title>FIT2102 A1 2023</title>
   </head>
   <body>
-    <h1>Tetris</h1>
-    <main id="main" class="flex row">
-      <svg id="svgCanvas">
-        <!-- game over text box -->
-        <g id="gameOver" visibility="hidden">
-          <rect x="26" y="120" fill="white" height="48" width="149"></rect>
-          <text x="36" y="150">Game Over</text>
-        </g>
-      </svg>
-      <div id="sideBar" class="flex col">
-        <svg id="svgPreview">
-        </svg>        
-        <div id="info" class="flex col">
-          <div class="text">
-            <span class="left">Score: </span>
-            <span class="right" id="scoreText">...</span>
-          </div>
-          <div class="text">
-            <span class="left">Highscore: </span>
-            <span class="right" id="highScoreText">...</span>
+    <div id="leftSide" class="flex col side">
+      <h2>Game rules</h2>
+      <ul id="leftList">
+        <li>100 points are awarded for each row cleared</li>
+        <li>Game speed increases after reaching 200 score</li>
+        <li>The game restarts automatically after showing game over box briefly</li>
+        <li>Highscore is tracked until page is refreshed</li>
+      </ul>
+    </div>
+
+    <div id="centerContent" class="flex col">
+      <h1>Tetris</h1>
+      <main id="main" class="flex row">
+        <svg id="svgCanvas">
+          <!-- game over text box -->
+          <g id="gameOver" visibility="hidden">
+            <rect x="26" y="120" fill="white" height="48" width="149"></rect>
+            <text x="36" y="150">Game Over</text>
+          </g>
+        </svg>
+        <div id="sideBar" class="flex col">
+          <svg id="svgPreview">
+          </svg>        
+          <div id="info" class="flex col">
+            <div class="text">
+              <span class="left">Score: </span>
+              <span class="right" id="scoreText">...</span>
+            </div>
+            <div class="text">
+              <span class="left">Highscore: </span>
+              <span class="right" id="highScoreText">...</span>
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
+
+    <div id="rightSide" class="flex col side">
+      <h2>Playing instructions</h2>
+      <ul id="rightList">
+        <li>`A` button: Move block left</li>
+        <li>`D` button: Move block right</li>
+        <li>`S` button: Move block down</li>
+        <li>`H` button: Hold the block</li>
+        <li>`E` button: rotate block clockwise</li>
+        <li>`Q` button: rotate block anti-clockwise</li>
+      </ul>
+      
+    </div>
+
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

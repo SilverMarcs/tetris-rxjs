@@ -1,3 +1,11 @@
+/**
+ * This module contains the game logic for Tetris.
+ * It exports the initial state of the game, the tick function that updates the game state for each cycle,
+ * and the game actions that can be performed (move left, move right, move down, rotate clockwise, rotate anti-clockwise, hold, and tick).
+ * It also exports utility functions used by the tick function.
+ * @packageDocumentation
+ */
+
 import {
   clearFullRows,
   generateBlock,
@@ -51,7 +59,7 @@ export const tick = (state: State): State => {
   if (hasLanded) {
     return updateStateAfterLanding(state);
   } else {
-    // If the current block hasn't landed, try to move it down
+    // If the current block hasn't landed, try to move it down. we cannot simply call moveBlockDown as game needs to process other things when block is falling on its own.
     return moveCurrentBlockDown(state, newBlocks, newScore);
   }
 };
@@ -125,6 +133,7 @@ const restartGame = (state: State): State => {
 
 /**
  * Creates a game action based on the given action logic.
+ * This is essentially a wrapper for passing the current block and old blocks to the action logic.
  * @param action - The action to perform.
  * @returns The new game state after the action.
  */
@@ -138,6 +147,30 @@ const createGameAction = (
 };
 
 /**
+ * Holds the current block and swaps it with the hold block (if any).
+ * @param state - The current game state.
+ * @returns The new game state after the hold action.
+ */
+const holdAction = (state: State): State => {
+  // set the current block to the hold block and generate a new hold block
+  const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(
+    state.currentBlock,
+    state.holdBlock
+  );
+  // set the next block to the current block and generate a new next block
+  const { newCurrentBlock: finalCurrentBlock, newNextBlock } = setCurrentBlock(
+    newCurrentBlock,
+    state.nextBlock
+  );
+  return {
+    ...state,
+    currentBlock: finalCurrentBlock,
+    nextBlock: newNextBlock,
+    holdBlock: newHoldBlock,
+  };
+};
+
+/**
  * The game actions that can be performed.
  */
 export const gameActions: { [key in Event]: (s: State) => State } = {
@@ -146,19 +179,6 @@ export const gameActions: { [key in Event]: (s: State) => State } = {
   Down: createGameAction(moveBlockDown),
   RotateClockwise: createGameAction(rotateBlockClockwise),
   RotateAntiClockwise: createGameAction(rotateBlockAntiClockwise),
+  Hold: holdAction,
   Tick: (s: State) => tick(s),
-  Hold: (s: State) => {
-    const { newCurrentBlock, newHoldBlock } = holdCurrentBlock(
-      s.currentBlock,
-      s.holdBlock
-    );
-    const { newCurrentBlock: finalCurrentBlock, newNextBlock } =
-      setCurrentBlock(newCurrentBlock, s.nextBlock);
-    return {
-      ...s,
-      currentBlock: finalCurrentBlock,
-      nextBlock: newNextBlock,
-      holdBlock: newHoldBlock,
-    };
-  },
 };
