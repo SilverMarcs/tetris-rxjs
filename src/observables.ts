@@ -1,5 +1,6 @@
 import { BehaviorSubject, Observable, fromEvent, interval, merge } from "rxjs";
 import { filter, map, scan, switchMap } from "rxjs/operators";
+import { Constants } from "./constants";
 import { gameActions, initialState } from "./game";
 import { getTickRate } from "./generics"; // replace with actual module path
 import { Event, Key, State } from "./types"; // replace with actual module path
@@ -50,23 +51,13 @@ export const movements$ = merge(
   hold$
 );
 
-// Create observables for score. need to use BehaviorSubjects to have access to current score in order to update the tick rate observable
-export const score$ = new BehaviorSubject(initialState.score);
-
-// Create a stream of ticks and/or game speed based on the score
-export const tick$ = score$.pipe(
-  switchMap((score) => interval(getTickRate(score))),
+export const tick$ = interval(Constants.TICK_RATE_MS).pipe(
   map(() => "Tick" as Event)
 );
 
 export const game$ = merge(movements$, tick$).pipe(
   scan((state: State, event: Event) => {
-    const newState = gameActions[event](state);
-    if (state.gameEnd) {
-      // we need to do this so as to let the render function know that the game has ended to show a game over banner
-      const updatedState = { ...newState, gameEnd: false };
-      return updatedState;
-    }
-    return newState;
+    const updatedState = gameActions[event](state);
+    return updatedState;
   }, initialState)
 );

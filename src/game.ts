@@ -41,6 +41,11 @@ export const initialState: State = {
  * @returns The new game state after the tick.
  */
 export const tick = (state: State): State => {
+  // This is needed because the game end status is set to true in the tick function after the game has been restarted and we need to reset that to stop rendering gameOver box
+  if (state.gameEnd) {
+    return resetGameEndStatus(state);
+  }
+
   // Clear full rows and get the new blocks and score
   const { newBlocks, newScore } = clearFullRows(state.oldBlocks, state.score);
 
@@ -66,6 +71,18 @@ export const tick = (state: State): State => {
 
 /** Utility functions to make tick function more readable. **/
 
+/**
+ * Resets the game end status.
+ * @param state - The current game state.
+ * @returns The new game state after the game end status has been reset.
+ * This is used to reset the game end status after the game has been restarted.
+ **/
+const resetGameEndStatus = (state: State): State => {
+  return {
+    ...state,
+    gameEnd: false,
+  };
+};
 /**
  * Checks if the current block has landed.
  * @param currentBlock - The current block.
