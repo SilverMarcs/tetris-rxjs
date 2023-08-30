@@ -158,10 +158,8 @@ const holdAction = (state: State): State => {
     state.holdBlock
   );
   // set the next block to the current block and generate a new next block
-  const { newCurrentBlock: finalCurrentBlock, newNextBlock } = setCurrentBlock(
-    newCurrentBlock,
-    state.nextBlock
-  );
+  const { newCurrentBlock: finalCurrentBlock, newNextBlock: newNextBlock } =
+    setCurrentBlock(newCurrentBlock, state.nextBlock);
   return {
     ...state,
     currentBlock: finalCurrentBlock,

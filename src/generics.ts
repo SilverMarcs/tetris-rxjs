@@ -1,6 +1,17 @@
 import { Constants } from "./constants";
 import { generateRandomBlock } from "./shapes";
-import { Block, BlockPosition, CubePosition, Position, State } from "./types";
+import {
+  Block,
+  BlockAction,
+  BlockPosition,
+  BoundaryCheck,
+  CollisionCheck,
+  CubePosition,
+  MoveLogic,
+  Position,
+  RotateLogic,
+  State,
+} from "./types";
 
 /**
  * Generates a new current block and a new next block.
@@ -23,19 +34,24 @@ export const generateBlock = (
  * @param movelogic - The move logic function to apply to the block's position.
  * @returns A new block position after applying the move logic function.
  */
-export const move =
-  (movelogic: (pos: Position<number>) => Position<number>) =>
+const move =
+  (movelogic: MoveLogic) =>
   (block: BlockPosition): BlockPosition =>
     block.map(movelogic);
 
 // Logic for moving the current block down by one unit
-const moveDownLogic = (pos: Position<number>) => ({ ...pos, y: pos.y + 1 });
-
-// Logic for moving the current block left by one unit
-const moveLeftLogic = (pos: Position<number>) => ({ ...pos, x: pos.x - 1 });
-
-// Logic for moving the current block right by one unit
-const moveRightLogic = (pos: Position<number>) => ({ ...pos, x: pos.x + 1 });
+const moveDownLogic: MoveLogic = (pos: Position<number>) => ({
+  ...pos,
+  y: pos.y + 1,
+});
+const moveLeftLogic: MoveLogic = (pos: Position<number>) => ({
+  ...pos,
+  x: pos.x - 1,
+});
+const moveRightLogic: MoveLogic = (pos: Position<number>) => ({
+  ...pos,
+  x: pos.x + 1,
+});
 
 /**
  * Creates a function that moves a block in a specified direction based on the provided move logic and boundary check functions.
@@ -44,10 +60,7 @@ const moveRightLogic = (pos: Position<number>) => ({ ...pos, x: pos.x + 1 });
  * @returns A function that takes the current block, an array of old blocks, and a boolean indicating if the game has ended, and returns the new position of the block after moving in the specified direction.
  */
 const createMoveBlockAction =
-  (
-    moveLogic: (pos: Position<number>) => Position<number>,
-    boundaryCheck: (cubePos: CubePosition) => boolean
-  ) =>
+  (moveLogic: MoveLogic, boundaryCheck: BoundaryCheck): BlockAction =>
   (currentBlock: Block, oldBlocks: BlockPosition[]): Block => {
     // If there is no current block, the game has ended, the block has reached the boundary, or the block has collided with any old block, it returns the current block without moving it
     if (
@@ -63,19 +76,17 @@ const createMoveBlockAction =
   };
 
 // Moves the current block down by one unit and specifies the boundary to check
-export const moveBlockDown = createMoveBlockAction(
+export const moveBlockDown: BlockAction = createMoveBlockAction(
   moveDownLogic,
   (cubePos) => cubePos.y + 1 >= Constants.GRID_HEIGHT
 );
 
-// Moves the current block left by one unit and specifies the boundary to check
-export const moveBlockLeft = createMoveBlockAction(
+export const moveBlockLeft: BlockAction = createMoveBlockAction(
   moveLeftLogic,
   (cubePos) => cubePos.x - 1 < 0
 );
 
-// Moves the current block right by one unit and specifies the boundary to check
-export const moveBlockRight = createMoveBlockAction(
+export const moveBlockRight: BlockAction = createMoveBlockAction(
   moveRightLogic,
   (cubePos) => cubePos.x + 1 >= Constants.GRID_WIDTH
 );
@@ -124,8 +135,9 @@ const rotateAntiClockwiseLogic = (pos: CubePosition, center: CubePosition) => ({
  * @param rotateLogic A function that takes the current block and returns the rotated block.
  * @returns A function that takes the current block, an array of old blocks, and a boolean indicating if the game has ended, and returns the rotated block.
  */
+
 const createRotateBlockAction =
-  (rotateLogic: (pos: BlockPosition) => BlockPosition) =>
+  (rotateLogic: RotateLogic): BlockAction =>
   (currentBlock: Block, oldBlocks: BlockPosition[]): Block => {
     // If there is no current block or the game has ended, it returns the current block without rotating it
     if (!currentBlock) {
@@ -156,13 +168,13 @@ const createRotateBlockAction =
   };
 
 // Use the rotate logic functions to define the rotate block actions in clockwise direction
-export const rotateBlockClockwise = createRotateBlockAction((block) =>
-  rotate(block, rotateClockwiseLogic)
+export const rotateBlockClockwise: BlockAction = createRotateBlockAction(
+  (block) => rotate(block, rotateClockwiseLogic)
 );
 
 // Use the rotate logic functions to define the rotate block actions in anticlockwise direction
-export const rotateBlockAntiClockwise = createRotateBlockAction((block) =>
-  rotate(block, rotateAntiClockwiseLogic)
+export const rotateBlockAntiClockwise: BlockAction = createRotateBlockAction(
+  (block) => rotate(block, rotateAntiClockwiseLogic)
 );
 
 /**
@@ -171,7 +183,7 @@ export const rotateBlockAntiClockwise = createRotateBlockAction((block) =>
  * @returns A function that takes in an block position and an array of old block positions, and returns a boolean indicating if the block has collided with any of the old blocks.
  */
 export const hasObjectCollided = (
-  moveLogic: (pos: Position<number>) => Position<number>,
+  moveLogic: MoveLogic,
   block: BlockPosition,
   oldBlocks: BlockPosition[]
 ): boolean => {
@@ -187,23 +199,14 @@ export const hasObjectCollided = (
   );
 };
 
-// check if the object has collided with any old blocks after moving down
-export const hasObjectCollidedDown = (
-  block: BlockPosition,
-  oldObjects: BlockPosition[]
-) => hasObjectCollided(moveDownLogic, block, oldObjects);
+export const hasObjectCollidedDown: CollisionCheck = (block, oldObjects) =>
+  hasObjectCollided(moveDownLogic, block, oldObjects);
 
-// check if the current block has collided with any old blocks after moving left
-const hasObjectCollidedLeft = (
-  block: BlockPosition,
-  oldObjects: BlockPosition[]
-) => hasObjectCollided(moveLeftLogic, block, oldObjects);
+const hasObjectCollidedLeft: CollisionCheck = (block, oldObjects) =>
+  hasObjectCollided(moveLeftLogic, block, oldObjects);
 
-const hasObjectCollidedRight = (
-  block: BlockPosition,
-  oldObjects: BlockPosition[]
-) => hasObjectCollided(moveRightLogic, block, oldObjects);
-
+const hasObjectCollidedRight: CollisionCheck = (block, oldObjects) =>
+  hasObjectCollided(moveRightLogic, block, oldObjects);
 /**
  * Checks if a block has reached the bottom of the board.
  * @param blockPos - The position of the block.

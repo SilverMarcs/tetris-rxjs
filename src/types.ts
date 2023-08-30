@@ -12,6 +12,19 @@ export type Rotation = "RotateClockwise" | "RotateAntiClockwise";
 
 export type Event = Direction | Rotation | "Hold" | "Tick";
 
+export type MoveLogic = (pos: Position<number>) => Position<number>;
+export type BoundaryCheck = (cubePos: CubePosition) => boolean;
+export type RotateLogic = (block: BlockPosition) => BlockPosition;
+// BlockAction and CollisionCheck are very similar, they have semantic differences so they are declared separately
+export type BlockAction = (
+  currentBlock: Block,
+  oldBlocks: BlockPosition[]
+) => Block;
+export type CollisionCheck = (
+  block: BlockPosition,
+  oldObjects: BlockPosition[]
+) => boolean;
+
 export type State = Readonly<{
   gameEnd: boolean;
   currentBlock?: BlockPosition;
