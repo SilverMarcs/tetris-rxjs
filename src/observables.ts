@@ -1,9 +1,9 @@
 import { BehaviorSubject, Observable, fromEvent, interval, merge } from "rxjs";
-import { filter, map, scan, switchMap } from "rxjs/operators";
+import { filter, map, scan, switchMap, throttleTime } from "rxjs/operators";
 import { Constants } from "./constants";
 import { gameActions, initialState } from "./game";
-import { getTickRate } from "./generics"; // replace with actual module path
-import { Event, Key, State } from "./types"; // replace with actual module path
+import { getTickRate } from "./generics";
+import { GameEvent, Key, State } from "./types";
 
 // Create an observable for keydown events
 export const key$ = fromEvent<KeyboardEvent>(document, "keydown");
@@ -12,31 +12,31 @@ export const key$ = fromEvent<KeyboardEvent>(document, "keydown");
 const fromKey = (keyCode: Key) =>
   filter((e: KeyboardEvent) => e.code === keyCode);
 
-export const left$: Observable<Event> = key$.pipe(
+export const left$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyA"),
   map(() => "Left")
 );
 
-export const right$: Observable<Event> = key$.pipe(
+export const right$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyD"),
   map(() => "Right")
 );
-export const down$: Observable<Event> = key$.pipe(
+export const down$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyS"),
   map(() => "Down")
 );
 
-export const rotateClockwise$: Observable<Event> = key$.pipe(
+export const rotateClockwise$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyE"),
   map(() => "RotateClockwise")
 );
 
-export const rotateAntiClockwise$: Observable<Event> = key$.pipe(
+export const rotateAntiClockwise$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyQ"),
   map(() => "RotateAntiClockwise")
 );
 
-export const hold$: Observable<Event> = key$.pipe(
+export const hold$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyH"),
   map(() => "Hold")
 );
@@ -49,14 +49,20 @@ export const movements$ = merge(
   rotateClockwise$,
   rotateAntiClockwise$,
   hold$
+).pipe(throttleTime(Constants.TICK_RATE_MS)); // throttle movements so they don't block the tick action
+
+// Create a score$ observable that emits the current score
+export const score$ = new BehaviorSubject<number>(0);
+
+// Create a tick$ observable that adjusts the tick rate based on the current score
+export const tick$ = score$.pipe(
+  switchMap((score) => interval(getTickRate(score))),
+  map(() => "Tick" as GameEvent)
 );
 
-export const tick$ = interval(Constants.TICK_RATE_MS).pipe(
-  map(() => "Tick" as Event)
-);
-
+// Merge the throttled user actions with the tick$ observable
 export const game$ = merge(movements$, tick$).pipe(
-  scan((state: State, event: Event) => {
+  scan((state: State, event: GameEvent) => {
     const updatedState = gameActions[event](state);
     return updatedState;
   }, initialState)

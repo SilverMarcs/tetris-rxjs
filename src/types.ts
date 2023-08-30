@@ -10,7 +10,7 @@ export type Key = "KeyA" | "KeyD" | "KeyH" | "KeyQ" | "KeyE" | "KeyS";
 export type Direction = "Left" | "Right" | "Down";
 export type Rotation = "RotateClockwise" | "RotateAntiClockwise";
 
-export type Event = Direction | Rotation | "Hold" | "Tick";
+export type GameEvent = Direction | Rotation | "Hold" | "Tick";
 
 export type MoveLogic = (pos: Position<number>) => Position<number>;
 export type BoundaryCheck = (cubePos: CubePosition) => boolean;

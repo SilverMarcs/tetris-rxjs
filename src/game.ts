@@ -21,7 +21,7 @@ import {
   setCurrentBlock,
 } from "./generics";
 
-import { Block, BlockPosition, Event, State } from "./types";
+import { Block, BlockPosition, GameEvent, State } from "./types";
 
 /**
  * The initial state of the game.
@@ -188,7 +188,7 @@ const holdAction = (state: State): State => {
 /**
  * The game actions that can be performed.
  */
-export const gameActions: { [key in Event]: (s: State) => State } = {
+export const gameActions: { [key in GameEvent]: (s: State) => State } = {
   Left: createGameAction(moveBlockLeft),
   Right: createGameAction(moveBlockRight),
   Down: createGameAction(moveBlockDown),
