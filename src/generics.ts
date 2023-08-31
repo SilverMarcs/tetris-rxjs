@@ -23,6 +23,8 @@ export const generateBlock = (
   return { newCurrentBlock, newNextBlock };
 };
 
+/* Move related functions */
+
 /**
  * Applies the given move logic function to the block's position and returns the new block position.
  * @param movelogic - The move logic function to apply to the block's position.
@@ -84,6 +86,8 @@ export const moveBlockRight: BlockAction = createMoveBlockAction(
   moveRightLogic,
   (cubePos) => cubePos.x + 1 >= Constants.GRID_WIDTH
 );
+
+/* Rotation related functions */
 
 /**
  * Generic function to rotates a block of cubes around its center using the provided rotate logic.
@@ -168,6 +172,8 @@ export const rotateBlockAntiClockwise: BlockAction = createRotateBlockAction(
   (block) => rotate(block, rotateAntiClockwiseLogic)
 );
 
+/* Collision check related functions */
+
 /**
  * Returns a function that checks if a block has collided with another block after applying the move logic.
  * @param moveLogic A function that takes in a position and returns a new position after applying the move logic.
@@ -201,6 +207,29 @@ const hasObjectCollidedRight: CollisionCheck = (block, oldObjects) =>
 
 export const hasBlockReachedBottom = (blockPos: BlockPosition): boolean =>
   blockPos.some((cubePos) => cubePos.y >= Constants.GRID_HEIGHT - 1);
+
+/* Clearing full rows related functions */
+
+export const clearFullRows = (
+  oldBlocks: BlockPosition[],
+  score: number
+): { newBlocks: BlockPosition[]; newScore: number } => {
+  const rows = calculateRowsInGrid(oldBlocks);
+  const fullRows = findFullRows(rows);
+
+  if (fullRows.length === 0) {
+    return { newBlocks: oldBlocks, newScore: score }; // no full rows, return the blocks and score as is
+  }
+
+  const newScore = score + fullRows.length * Constants.SINGLE_ROW_FILL_SCORE; // increase score by 100 for each full row
+
+  const remainingBlocks = removeCubesInFullRows(oldBlocks, fullRows);
+  const nonEmptyBlocks = removeEmptyBlocks(remainingBlocks);
+
+  const newBlocks = dropBlocksAboveClearedRows(nonEmptyBlocks, fullRows); // drop blocks above cleared rows
+
+  return { newBlocks, newScore };
+};
 
 export const dropBlocksAboveClearedRows = (
   oldBlocks: BlockPosition[],
@@ -246,55 +275,14 @@ export const removeCubesInFullRows = (
   );
 };
 
-/**
- * Removes the empty blocks from the board with length 0.
- * @param blocks - The existing blocks on the board.
- * @returns The updated blocks after removing the empty blocks.
- */
+// Removes the empty blocks from the board with length 0. It is used to clear off empty BlockPosition arrays
 export const removeEmptyBlocks = (blocks: BlockPosition[]): BlockPosition[] => {
   return blocks.filter((block) => block.length > 0);
 };
 
-/**
- * Clears the rows that are completely filled with cubes.
- * @param oldBlocks - The existing blocks on the board.
- * @param score - The current score.
- * @returns An array containing the updated blocks and the new score.
- */
-export const clearFullRows = (
-  oldBlocks: BlockPosition[],
-  score: number
-): { newBlocks: BlockPosition[]; newScore: number } => {
-  const rows = calculateRowsInGrid(oldBlocks);
-  const fullRows = findFullRows(rows);
+/* Hold block related functions */
 
-  if (fullRows.length === 0) {
-    return { newBlocks: oldBlocks, newScore: score }; // no full rows, return the blocks and score as is
-  }
-
-  const newScore = score + fullRows.length * Constants.SINGLE_ROW_FILL_SCORE; // increase score by 100 for each full row
-
-  const remainingBlocks = removeCubesInFullRows(oldBlocks, fullRows);
-  const nonEmptyBlocks = removeEmptyBlocks(remainingBlocks);
-
-  const newBlocks = dropBlocksAboveClearedRows(nonEmptyBlocks, fullRows); // drop blocks above cleared rows
-
-  return { newBlocks, newScore };
-};
-
-export const hasBlockReachedTop = (oldBlocks: BlockPosition[]): boolean => {
-  // check if any cube in any block has reached the top of the board
-  return oldBlocks.some((block) => block.some((cubePos) => cubePos.y === 0));
-};
-
-// gets tick rate based on the current score
-export const getTickRate = (score: number) => {
-  if (score >= Constants.DIFFICULTY_BARRIER_SCORE) {
-    return Constants.TICK_RATE_DECREASE_MS;
-  }
-  return Constants.TICK_RATE_MS;
-};
-
+// stores the current block in its current position for later use
 export const holdCurrentBlock = (
   currentBlock: Block,
   holdBlock: Block
@@ -314,6 +302,7 @@ export const holdCurrentBlock = (
   }
 };
 
+// sets the current block to the next block and generates a new next block
 export const setCurrentBlock = (
   currentBlock: Block,
   nextBlock: Block
@@ -329,4 +318,20 @@ export const setCurrentBlock = (
     const { newCurrentBlock, newNextBlock } = generateBlock(nextBlock);
     return { newCurrentBlock, newNextBlock };
   }
+};
+
+/* Misc functions */
+
+export const hasBlockReachedTop = (oldBlocks: BlockPosition[]): boolean => {
+  // check if any cube in any block has reached the top of the board
+  return oldBlocks.some((block) => block.some((cubePos) => cubePos.y === 0));
+};
+
+// gets tick rate based on the current score. It is possible to introduce other forms of difficulty by changing this function
+// Example could be increasing tick rate by a set value for every multiple of 200 points
+export const getTickRate = (score: number) => {
+  if (score >= Constants.DIFFICULTY_BARRIER_SCORE) {
+    return Constants.TICK_RATE_DECREASE_MS;
+  }
+  return Constants.TICK_RATE_MS;
 };
