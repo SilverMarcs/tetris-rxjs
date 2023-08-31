@@ -11,6 +11,7 @@ export const createSvgElement = (
   return elem;
 };
 
+// Higher order function that accepts an svg element and a color and returns a function that accepts a cube position and finally renders a cube
 const createCube =
   (svg: SVGElement, color: string) => (cubePos: CubePosition) => {
     const cube = createSvgElement(svg.namespaceURI, "rect", {
