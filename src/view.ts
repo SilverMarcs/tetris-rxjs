@@ -48,7 +48,7 @@ export const renderOldBlocks = (oldBlocks: BlockPosition[], svg: SVGElement) =>
   oldBlocks.flatMap((block) => block).forEach(createCube(svg, "green"));
 
 export const renderPreview = (block: BlockPosition, preview: SVGElement) => {
-  while (preview.firstChild) preview.firstChild.remove();
+  preview.innerHTML = "";
 
   // we take relative position of each cube in the block since we want to render the block in the middle of the preview
   // this is not by default as the positions are actually the random x and y positions from the block generator
@@ -70,7 +70,7 @@ export const render = (
   highScoreElement: HTMLElement,
   preview?: SVGElement
 ) => {
-  while (svg.firstChild) svg.firstChild.remove();
+  svg.innerHTML = "";
 
   scoreElement.textContent = `${score}`;
 

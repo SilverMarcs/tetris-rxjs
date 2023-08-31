@@ -41,8 +41,8 @@ export const hold$: Observable<GameEvent> = key$.pipe(
   map(() => "Hold")
 );
 
-// Merge all movement observables into one
-export const movements$ = merge(
+// Merge all user action observables into one
+export const userAction$ = merge(
   left$,
   right$,
   down$,
@@ -61,7 +61,7 @@ export const tick$ = score$.pipe(
 );
 
 // Merge the throttled user actions with the tick$ observable
-export const game$ = merge(movements$, tick$).pipe(
+export const game$ = merge(userAction$, tick$).pipe(
   scan((state: State, event: GameEvent) => {
     const updatedState = gameActions[event](state);
     return updatedState;

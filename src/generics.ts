@@ -10,7 +10,6 @@ import {
   MoveLogic,
   Position,
   RotateLogic,
-  State,
 } from "./types";
 
 export const generateBlock = (
