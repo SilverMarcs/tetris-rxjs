@@ -49,7 +49,7 @@ export const userAction$ = merge(
   rotateClockwise$,
   rotateAntiClockwise$,
   hold$
-).pipe(throttleTime(Constants.TICK_RATE_MS)); // throttle movements so they don't block the tick action
+);
 
 // Create a score$ observable that emits the current score
 export const score$ = new BehaviorSubject<number>(initialState.score);
