@@ -219,20 +219,19 @@ export const dropBlocksAboveClearedRows = (
   );
 
 export const calculateRowsInGrid = (
-  oldBlocks: BlockPosition[]
-): CubePosition[][] => {
-  // Create an array of length GRID_HEIGHT and map each element to an array of cubes that belong to that row
+  oldBlocks: ReadonlyArray<BlockPosition>
+): ReadonlyArray<ReadonlyArray<CubePosition>> => {
   return Array.from({ length: Constants.GRID_HEIGHT }, (_, index) =>
-    // Reduce the oldBlocks array to an array of cubes that belong to the current row
     oldBlocks.reduce(
-      (row, block) => row.concat(block.filter((cube) => cube.y === index)),
-      [] as CubePosition[]
+      (row, block) => [...row, ...block.filter((cube) => cube.y === index)],
+      [] as ReadonlyArray<CubePosition>
     )
   );
 };
 
-export const findFullRows = (rows: CubePosition[][]): number[] => {
-  // map each row to its index if it is full, otherwise -1
+export const findFullRows = (
+  rows: ReadonlyArray<ReadonlyArray<CubePosition>>
+): number[] => {
   return rows
     .map((row, index) => (row.length === Constants.GRID_WIDTH ? index : -1))
     .filter((index) => index !== -1);

@@ -52,7 +52,7 @@ export const movements$ = merge(
 ).pipe(throttleTime(Constants.TICK_RATE_MS)); // throttle movements so they don't block the tick action
 
 // Create a score$ observable that emits the current score
-export const score$ = new BehaviorSubject<number>(0);
+export const score$ = new BehaviorSubject<number>(initialState.score);
 
 // Create a tick$ observable that adjusts the tick rate based on the current score
 export const tick$ = score$.pipe(
