@@ -13,11 +13,6 @@ import {
   State,
 } from "./types";
 
-/**
- * Generates a new current block and a new next block.
- * @param nextBlock - The next block to be generated.
- * @returns An object containing the new current block and the new next block.
- */
 export const generateBlock = (
   nextBlock: Block
 ): { newCurrentBlock: BlockPosition; newNextBlock: BlockPosition } => {
@@ -39,19 +34,16 @@ const move =
   (block: BlockPosition): BlockPosition =>
     block.map(movelogic);
 
-// Logic for moving the current block down by one unit
 const moveDownLogic: MoveLogic = (pos: Position<number>) => ({
   ...pos,
   y: pos.y + 1,
 });
 
-// Logic for moving the current block left by one unit
 const moveLeftLogic: MoveLogic = (pos: Position<number>) => ({
   ...pos,
   x: pos.x - 1,
 });
 
-// Logic for moving the current block right by one unit
 const moveRightLogic: MoveLogic = (pos: Position<number>) => ({
   ...pos,
   x: pos.x + 1,
@@ -79,19 +71,16 @@ const createMoveBlockAction =
     return move(moveLogic)(currentBlock);
   };
 
-// Moves the current block down by one unit and specifies the boundary to check
 export const moveBlockDown: BlockAction = createMoveBlockAction(
   moveDownLogic,
   (cubePos) => cubePos.y + 1 >= Constants.GRID_HEIGHT
 );
 
-// Moves the current block left by one unit and specifies the boundary to check
 export const moveBlockLeft: BlockAction = createMoveBlockAction(
   moveLeftLogic,
   (cubePos) => cubePos.x - 1 < 0
 );
 
-// Moves the current block right by one unit and specifies the boundary to check
 export const moveBlockRight: BlockAction = createMoveBlockAction(
   moveRightLogic,
   (cubePos) => cubePos.x + 1 >= Constants.GRID_WIDTH
@@ -124,7 +113,6 @@ const rotate = (
   return object.map((pos) => rotateLogic(pos, adjustedCenter));
 };
 
-// defines logic for rotating a block clockwise
 const rotateClockwiseLogic = (pos: CubePosition, center: CubePosition) => ({
   x: center.x - pos.y + center.y,
   y: center.y + pos.x - center.x,
@@ -173,12 +161,10 @@ const createRotateBlockAction =
     return rotatedBlock;
   };
 
-// Use the rotate logic functions to define the rotate block actions in clockwise direction
 export const rotateBlockClockwise: BlockAction = createRotateBlockAction(
   (block) => rotate(block, rotateClockwiseLogic)
 );
 
-// Use the rotate logic functions to define the rotate block actions in anticlockwise direction
 export const rotateBlockAntiClockwise: BlockAction = createRotateBlockAction(
   (block) => rotate(block, rotateAntiClockwiseLogic)
 );
@@ -213,20 +199,10 @@ const hasObjectCollidedLeft: CollisionCheck = (block, oldObjects) =>
 
 const hasObjectCollidedRight: CollisionCheck = (block, oldObjects) =>
   hasObjectCollided(moveRightLogic, block, oldObjects);
-/**
- * Checks if a block has reached the bottom of the board.
- * @param blockPos - The position of the block.
- * @returns A boolean indicating whether the block has reached the bottom of the board.
- */
+
 export const hasBlockReachedBottom = (blockPos: BlockPosition): boolean =>
   blockPos.some((cubePos) => cubePos.y >= Constants.GRID_HEIGHT - 1);
 
-/**
- * Drops the blocks above cleared rows.
- * @param oldBlocks - The existing blocks on the board.
- * @param clearedRows - The rows that have been cleared.
- * @returns The updated blocks after dropping the blocks above cleared rows.
- */
 export const dropBlocksAboveClearedRows = (
   oldBlocks: BlockPosition[],
   clearedRows: number[]
@@ -242,12 +218,9 @@ export const dropBlocksAboveClearedRows = (
     })
   );
 
-/**
- * Calculates the rows of cubes in the grid based on the given blocks.
- * @param oldBlocks The blocks to calculate the rows from.
- * @returns An array of cube positions representing the rows in the grid.
- */
-export const calculateRows = (oldBlocks: BlockPosition[]): CubePosition[][] => {
+export const calculateRowsInGrid = (
+  oldBlocks: BlockPosition[]
+): CubePosition[][] => {
   // Create an array of length GRID_HEIGHT and map each element to an array of cubes that belong to that row
   return Array.from({ length: Constants.GRID_HEIGHT }, (_, index) =>
     // Reduce the oldBlocks array to an array of cubes that belong to the current row
@@ -258,11 +231,6 @@ export const calculateRows = (oldBlocks: BlockPosition[]): CubePosition[][] => {
   );
 };
 
-/**
- * Finds the rows that are completely filled with cubes.
- * @param rows - The rows on the board.
- * @returns An array containing the indices of the rows that are completely filled with cubes.
- */
 export const findFullRows = (rows: CubePosition[][]): number[] => {
   // map each row to its index if it is full, otherwise -1
   return rows
@@ -270,12 +238,6 @@ export const findFullRows = (rows: CubePosition[][]): number[] => {
     .filter((index) => index !== -1);
 };
 
-/**
- * Removes the cubes in the rows that are completely filled with cubes.
- * @param oldBlocks - The existing blocks on the board.
- * @param fullRows - The rows that are completely filled with cubes.
- * @returns The updated blocks after removing the cubes in the rows that are completely filled with cubes.
- */
 export const removeCubesInFullRows = (
   oldBlocks: BlockPosition[],
   fullRows: number[]
@@ -287,12 +249,11 @@ export const removeCubesInFullRows = (
 };
 
 /**
- * Removes the empty blocks from the board.
+ * Removes the empty blocks from the board with length 0.
  * @param blocks - The existing blocks on the board.
  * @returns The updated blocks after removing the empty blocks.
  */
 export const removeEmptyBlocks = (blocks: BlockPosition[]): BlockPosition[] => {
-  // filter out the empty blocks
   return blocks.filter((block) => block.length > 0);
 };
 
@@ -306,7 +267,7 @@ export const clearFullRows = (
   oldBlocks: BlockPosition[],
   score: number
 ): { newBlocks: BlockPosition[]; newScore: number } => {
-  const rows = calculateRows(oldBlocks);
+  const rows = calculateRowsInGrid(oldBlocks);
   const fullRows = findFullRows(rows);
 
   if (fullRows.length === 0) {
@@ -323,42 +284,12 @@ export const clearFullRows = (
   return { newBlocks, newScore };
 };
 
-/**
- * Checks if a block has reached the top of the board.
- * @param oldBlocks - The existing blocks on the board.
- * @returns A boolean indicating whether a block has reached the top of the board.
- */
 export const hasBlockReachedTop = (oldBlocks: BlockPosition[]): boolean => {
   // check if any cube in any block has reached the top of the board
   return oldBlocks.some((block) => block.some((cubePos) => cubePos.y === 0));
 };
 
-/**
- * Function to update the tick rate based on the current score.
- * The tick rate determines the speed at which the blocks fall.
- * @param score - The current score.
- * @param currentTickRate - The current tick rate.
- * @returns The updated tick rate. If the score has reached the difficulty barrier, the tick rate decreases (game speeds up). Otherwise, the tick rate remains the same.
- */
-export const updateTickRate = (
-  score: number,
-  currentTickRate: number
-): number => {
-  // If the score has reached the difficulty barrier, the tick rate decreases (game speeds up)
-  if (score >= Constants.DIFFICULTY_BARRIER_SCORE) {
-    return Constants.TICK_RATE_DECREASE_MS;
-  }
-  // Otherwise, the tick rate remains the same
-  return currentTickRate;
-};
-
-/**
- * Returns the tick speed based on the score.
- * If the score is greater than or equal to the difficulty barrier score, it returns the tick rate decrease in milliseconds.
- * Otherwise, it returns the tick rate in milliseconds.
- * @param score The current score.
- * @returns The tick speed in milliseconds.
- */
+// gets tick rate based on the current score
 export const getTickRate = (score: number) => {
   if (score >= Constants.DIFFICULTY_BARRIER_SCORE) {
     return Constants.TICK_RATE_DECREASE_MS;
@@ -366,12 +297,6 @@ export const getTickRate = (score: number) => {
   return Constants.TICK_RATE_MS;
 };
 
-/**
- * Holds the current block and the hold block.
- * @param currentBlock - The current block to be held.
- * @param holdBlock - The block to be held.
- * @returns An object containing the new current block and the new hold block.
- */
 export const holdCurrentBlock = (
   currentBlock: Block,
   holdBlock: Block
@@ -391,12 +316,6 @@ export const holdCurrentBlock = (
   }
 };
 
-/**
- * Sets the current block and the next block.
- * @param currentBlock - The current block to be set.
- * @param nextBlock - The next block to be set.
- * @returns An object containing the new current block and the new next block.
- */
 export const setCurrentBlock = (
   currentBlock: Block,
   nextBlock: Block
