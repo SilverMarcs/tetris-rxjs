@@ -205,9 +205,6 @@ const hasObjectCollidedLeft: CollisionCheck = (block, oldObjects) =>
 const hasObjectCollidedRight: CollisionCheck = (block, oldObjects) =>
   hasObjectCollided(moveRightLogic, block, oldObjects);
 
-export const hasBlockReachedBottom = (blockPos: BlockPosition): boolean =>
-  blockPos.some((cubePos) => cubePos.y >= Constants.GRID_HEIGHT - 1);
-
 /* Clearing full rows related functions */
 
 export const clearFullRows = (
@@ -326,6 +323,9 @@ export const hasBlockReachedTop = (oldBlocks: BlockPosition[]): boolean => {
   // check if any cube in any block has reached the top of the board
   return oldBlocks.some((block) => block.some((cubePos) => cubePos.y === 0));
 };
+
+export const hasBlockReachedBottom = (blockPos: BlockPosition): boolean =>
+  blockPos.some((cubePos) => cubePos.y >= Constants.GRID_HEIGHT - 1);
 
 // gets tick rate based on the current score. It is possible to introduce other forms of difficulty by changing this function
 // Example could be increasing tick rate by a set value for every multiple of 200 points
