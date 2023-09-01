@@ -1,6 +1,5 @@
 import { BehaviorSubject, Observable, fromEvent, interval, merge } from "rxjs";
-import { filter, map, scan, switchMap, throttleTime } from "rxjs/operators";
-import { Constants } from "./constants";
+import { filter, map, scan, switchMap } from "rxjs/operators";
 import { gameActions, initialState } from "./game";
 import { getTickRate } from "./generics";
 import { GameEvent, Key, State } from "./types";
@@ -60,10 +59,12 @@ export const tick$ = score$.pipe(
   map(() => "Tick" as GameEvent)
 );
 
-// Merge the throttled user actions with the tick$ observable
 export const game$ = merge(userAction$, tick$).pipe(
   scan((state: State, event: GameEvent) => {
     const updatedState = gameActions[event](state);
+    if (state.score !== updatedState.score) {
+      score$.next(updatedState.score);
+    }
     return updatedState;
   }, initialState)
 );
