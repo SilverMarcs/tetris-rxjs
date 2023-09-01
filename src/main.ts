@@ -1,7 +1,7 @@
 import "./style.css";
 
 import { Viewport } from "./constants";
-import { game$, score$ } from "./observables";
+import { game$ } from "./observables";
 import { State } from "./types";
 import { render } from "./view";
 

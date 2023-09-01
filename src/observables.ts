@@ -5,56 +5,62 @@ import { getTickRate } from "./generics";
 import { GameEvent, Key, State } from "./types";
 
 // Create an observable for keydown events
-export const key$ = fromEvent<KeyboardEvent>(document, "keydown");
+const key$ = fromEvent<KeyboardEvent>(document, "keydown");
 
 // function to filter keydown events by key code
 const fromKey = (keyCode: Key) =>
   filter((e: KeyboardEvent) => e.code === keyCode);
 
-export const left$: Observable<GameEvent> = key$.pipe(
+const left$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyA"),
   map(() => "Left")
 );
 
-export const right$: Observable<GameEvent> = key$.pipe(
+const right$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyD"),
   map(() => "Right")
 );
-export const down$: Observable<GameEvent> = key$.pipe(
+const down$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyS"),
   map(() => "Down")
 );
 
-export const rotateClockwise$: Observable<GameEvent> = key$.pipe(
+const rotateClockwise$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyE"),
   map(() => "RotateClockwise")
 );
 
-export const rotateAntiClockwise$: Observable<GameEvent> = key$.pipe(
+const rotateAntiClockwise$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyQ"),
   map(() => "RotateAntiClockwise")
 );
 
-export const hold$: Observable<GameEvent> = key$.pipe(
+const hold$: Observable<GameEvent> = key$.pipe(
   fromKey("KeyH"),
   map(() => "Hold")
 );
 
+const restart$: Observable<GameEvent> = key$.pipe(
+  fromKey("KeyR"),
+  map(() => "Restart")
+);
+
 // Merge all user action observables into one
-export const userAction$ = merge(
+const userAction$: Observable<GameEvent> = merge(
   left$,
   right$,
   down$,
   rotateClockwise$,
   rotateAntiClockwise$,
-  hold$
+  hold$,
+  restart$
 );
 
 // Create a score$ observable that emits the current score
-export const score$ = new BehaviorSubject<number>(initialState.score);
+const score$ = new BehaviorSubject<number>(initialState.score);
 
 // Create a tick$ observable that adjusts the tick rate based on the current score
-export const tick$ = score$.pipe(
+const tick$ = score$.pipe(
   switchMap((score) => interval(getTickRate(score))),
   map(() => "Tick" as GameEvent)
 );

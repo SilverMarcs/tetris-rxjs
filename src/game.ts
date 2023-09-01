@@ -1,11 +1,3 @@
-/**
- * This module contains the game logic for Tetris.
- * It exports the initial state of the game, the tick function that updates the game state for each cycle,
- * and the game actions that can be performed (move left, move right, move down, rotate clockwise, rotate anti-clockwise, hold, and tick).
- * It also exports utility functions used by the tick function.
- * @packageDocumentation
- */
-
 import {
   clearFullRows,
   generateBlock,
@@ -54,7 +46,7 @@ export const tick = (state: State): State => {
 
   // If the game is over, return the updated state with gameEnd set to true
   if (gameOver) {
-    return restartGame(state);
+    return restartGameAfterGameOver(state);
   }
 
   // Check if the current block has reached the bottom or collided with another block
@@ -135,18 +127,18 @@ const moveCurrentBlockDown = (
   };
 };
 
-/**
- * Restarts the game.
- * @param state - The current game state.
- * @returns The new game state after the game has restarted.
- */
-const restartGame = (state: State): State => {
-  return {
-    ...initialState,
-    highScore: Math.max(state.highScore, state.score),
-    gameEnd: true,
+const createGameRestarter =
+  (isGameOver: boolean) =>
+  (gameState: State): State => {
+    return {
+      ...initialState,
+      highScore: Math.max(gameState.highScore, gameState.score),
+      gameEnd: isGameOver,
+    };
   };
-};
+
+const restartGameAfterGameOver = createGameRestarter(true);
+const restartGameByUserAction = createGameRestarter(false);
 
 /**
  * Creates a game action based on the given action logic.
@@ -196,4 +188,5 @@ export const gameActions: { [key in GameEvent]: (s: State) => State } = {
   RotateAntiClockwise: createGameAction(rotateBlockAntiClockwise),
   Hold: holdAction,
   Tick: (s: State) => tick(s),
+  Restart: (s: State) => restartGameByUserAction(s),
 };
