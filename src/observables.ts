@@ -1,5 +1,11 @@
 import { BehaviorSubject, Observable, fromEvent, interval, merge } from "rxjs";
-import { filter, map, scan, switchMap } from "rxjs/operators";
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  scan,
+  switchMap,
+} from "rxjs/operators";
 import { gameActions, initialState } from "./game";
 import { getTickRate } from "./generics";
 import { GameEvent, Key, State } from "./types";
@@ -57,20 +63,19 @@ const userAction$: Observable<GameEvent> = merge(
 );
 
 // Create a score$ observable that emits the current score
-const score$ = new BehaviorSubject<number>(initialState.score);
+export const score$ = new BehaviorSubject<number>(initialState.score);
+
+// Create a distinctScore$ observable that emits the current score only when it changes
+export const distinctScore$ = score$.pipe(distinctUntilChanged());
 
 // Create a tick$ observable that adjusts the tick rate based on the current score
-const tick$ = score$.pipe(
+export const tick$ = distinctScore$.pipe(
   switchMap((score) => interval(getTickRate(score))),
   map(() => "Tick" as GameEvent)
 );
 
 export const game$ = merge(userAction$, tick$).pipe(
   scan((state: State, event: GameEvent) => {
-    const updatedState = gameActions[event](state);
-    if (state.score !== updatedState.score) {
-      score$.next(updatedState.score);
-    }
-    return updatedState;
+    return gameActions[event](state);
   }, initialState)
 );
