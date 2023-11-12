@@ -1,7 +1,6 @@
-# Assignment 1
+# Tetris RxJS
 
-Zabir Raihan
-32353057
+A simple tetris game built using RxJS.
 
 ## Usage
 
