@@ -247,9 +247,13 @@ export const calculateRowsInGrid = (
   oldBlocks: ReadonlyArray<BlockPosition>
 ): ReadonlyArray<ReadonlyArray<CubePosition>> => {
   return Array.from({ length: Constants.GRID_HEIGHT }, (_, index) =>
+    // reduce the oldBlocks array to an array of cubes that belong to the current row
     oldBlocks.reduce(
-      (row, block) => [...row, ...block.filter((cube) => cube.y === index)],
-      [] as ReadonlyArray<CubePosition>
+      (row, block) => [
+        ...row, // spread the previous row
+        ...block.filter((cube) => cube.y === index), // filter the cubes that belong to the current row and spread them
+      ],
+      [] as ReadonlyArray<CubePosition> // initialize the row as an empty array
     )
   );
 };
@@ -258,7 +262,9 @@ export const findFullRows = (
   rows: ReadonlyArray<ReadonlyArray<CubePosition>>
 ): number[] => {
   return rows
+    // map each row to its index if it is full, otherwise map it to -1
     .map((row, index) => (row.length === Constants.GRID_WIDTH ? index : -1))
+    // filter out the rows that are not full
     .filter((index) => index !== -1);
 };
 

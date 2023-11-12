@@ -129,13 +129,13 @@ const moveCurrentBlockDown = (
 
 const createGameRestarter =
   (isGameOver: boolean) =>
-  (gameState: State): State => {
-    return {
-      ...initialState,
-      highScore: Math.max(gameState.highScore, gameState.score),
-      gameEnd: isGameOver,
+    (gameState: State): State => {
+      return {
+        ...initialState,
+        highScore: Math.max(gameState.highScore, gameState.score),
+        gameEnd: isGameOver,
+      };
     };
-  };
 
 const restartGameAfterGameOver = createGameRestarter(true);
 const restartGameByUserAction = createGameRestarter(false);

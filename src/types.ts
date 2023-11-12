@@ -15,7 +15,7 @@ export type GameEvent = Direction | Rotation | "Hold" | "Tick" | "Restart";
 export type MoveLogic = (pos: Position<number>) => Position<number>;
 export type BoundaryCheck = (cubePos: CubePosition) => boolean;
 export type RotateLogic = (block: BlockPosition) => BlockPosition;
-// BlockAction and CollisionCheck are very similar, they have semantic differences so they are declared separately
+
 export type BlockAction = (
   currentBlock: Block,
   oldBlocks: BlockPosition[]

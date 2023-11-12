@@ -66,9 +66,11 @@ const userAction$: Observable<GameEvent> = merge(
 export const score$ = new BehaviorSubject<number>(initialState.score);
 
 // Create a distinctScore$ observable that emits the current score only when it changes
+// distinctUntilChanged is an operator in RxJS that filters out consecutive duplicate values in an Observable. It only emits a value if it is different from the previous value
 export const distinctScore$ = score$.pipe(distinctUntilChanged());
 
 // Create a tick$ observable that adjusts the tick rate based on the current score
+// switchMap is an operator that is used to transform the items emitted by an Observable into Observables, and then mirror the emissions from the most recently transformed Observable. It is similar to mergeMap and concatMap, but it cancels the previous inner Observable when a new one is emitted.
 export const tick$ = distinctScore$.pipe(
   switchMap((score) => interval(getTickRate(score))),
   map(() => "Tick" as GameEvent)
