@@ -1,6 +1,13 @@
 # Tetris RxJS
 
 A simple tetris game built using RxJS.
+<br>
+Demo [**here**](https://tetris-rxjs.vercel.app)
+
+## Screenshot
+
+<img width="1000" alt="Screenshot 2023-11-28 at 1 09 32 AM" src="https://github.com/SilverMarcs/tetris-rxjs/assets/77480421/28ad51af-2553-4d30-b2d2-647dd0b091ee">
+
 
 ## Usage
 
