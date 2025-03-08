@@ -1,6 +1,6 @@
 # Tetris RxJS
 
-A simple tetris game built using **RxJS**, **Javascript** and **TypeScript**
+A simple tetris game built using **RxJS** and **TypeScript**
 <br>
 Demo [**here**](https://tetris-rxjs.vercel.app)
 
